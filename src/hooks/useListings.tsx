@@ -1,21 +1,22 @@
-
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Listing } from '@/types/supabase';
 import { useToast } from './use-toast';
 
+type ListingOptions = {
+  category?: string;
+  search?: string;
+  limit?: number;
+  page?: number;
+};
+
 export const useListings = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
 
-  const fetchListings = async (options: {
-    category?: string;
-    search?: string;
-    limit?: number;
-    page?: number;
-  } = {}): Promise<{ data: Listing[]; count: number; error: any }> => {
+  const fetchListings = async (options: ListingOptions = {}): Promise<{ data: Listing[]; count: number; error: any }> => {
     setLoading(true);
     try {
       let query = supabase
