@@ -2,114 +2,13 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
 import { Listing } from '@/types/supabase';
-import { useToast } from './use-toast';
 
-type ListingOptions = {
-  category?: string;
-  search?: string;
-  limit?: number;
-  page?: number;
-};
-
-// Define the type explicitly for increment-views function body
-interface IncrementViewsBody {
-  listing_id: string;
-}
-
-export const useListings = () => {
+export const useListingMutation = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-
-  const fetchListings = async (options: ListingOptions = {}): Promise<{ data: Listing[]; count: number; error: any }> => {
-    setLoading(true);
-    try {
-      let query = supabase
-        .from('listings')
-        .select('*', { count: 'exact' });
-
-      if (options.category) {
-        query = query.eq('category_id', options.category);
-      }
-
-      if (options.search) {
-        query = query.or(
-          `title.ilike.%${options.search}%,description.ilike.%${options.search}%,location.ilike.%${options.search}%`
-        );
-      }
-
-      query = query.eq('is_available', true).order('created_at', { ascending: false });
-
-      if (options.limit) {
-        const offset = ((options.page || 1) - 1) * options.limit;
-        query = query.range(offset, offset + options.limit - 1);
-      }
-
-      const { data, error, count } = await query;
-
-      if (error) {
-        console.error('Error fetching listings:', error);
-        return { data: [], count: 0, error };
-      }
-
-      return { data: data as Listing[], count: count || 0, error: null };
-    } catch (error) {
-      console.error('Error in fetchListings:', error);
-      return { data: [], count: 0, error };
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchListing = async (id: string): Promise<{ data: Listing | null; error: any }> => {
-    setLoading(true);
-    try {
-      // Fixed: Properly type the function body
-      await supabase.functions.invoke('increment-views', {
-        body: { listing_id: id } as IncrementViewsBody
-      });
-
-      const { data, error } = await supabase
-        .from('listings')
-        .select(
-          `
-          *,
-          profiles:owner_id (
-            username,
-            avatar_url,
-            full_name
-          ),
-          reviews (
-            id,
-            rating,
-            comment,
-            created_at,
-            reviewer_id,
-            profiles:reviewer_id (
-              username,
-              avatar_url,
-              full_name
-            )
-          )
-        `
-        )
-        .eq('id', id)
-        .single();
-
-      if (error) {
-        console.error('Error fetching listing:', error);
-        return { data: null, error };
-      }
-
-      return { data: data as Listing, error: null };
-    } catch (error) {
-      console.error('Error in fetchListing:', error);
-      return { data: null, error };
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const createListing = async (listingData: {
     title: string;
@@ -287,8 +186,6 @@ export const useListings = () => {
   };
 
   return {
-    fetchListings,
-    fetchListing,
     createListing,
     updateListing,
     deleteListing,
