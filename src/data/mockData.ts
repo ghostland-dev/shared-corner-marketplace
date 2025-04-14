@@ -1,12 +1,11 @@
-
-import { Tool, Car, Home, BookOpen, Package, Camera, Music, Monitor, Briefcase } from 'lucide-react';
+import { Wrench, Car, Home, BookOpen, Package, Camera, Music, Monitor, Briefcase } from 'lucide-react';
 
 // Catégories principales
 export const categories = [
   {
     id: "bricolage",
     name: "Bricolage",
-    icon: Tool,
+    icon: Wrench,
     color: "bg-kiwiiz-primary",
     link: "/categories/bricolage",
   },
@@ -87,7 +86,7 @@ export const listings = [
     description: "Vélo électrique ville Decathlon Elops 900E, autonomie 70km, batterie en bon état. Parfait pour vos déplacements urbains.",
     price: 15.00,
     priceUnit: "jour",
-    imageUrl: "https://images.unsplash.com/photo-1560799486-f4b726357031",
+    imageUrl: "https://images.unsplash.com/photo-1560799486-f4b72635081c",
     location: "Lyon 7e",
     category: "Véhicules",
     categoryId: "vehicules",
