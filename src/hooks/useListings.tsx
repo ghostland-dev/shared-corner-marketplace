@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -11,9 +12,10 @@ type ListingOptions = {
   page?: number;
 };
 
-type IncrementViewsParams = {
+// Define the type explicitly for the increment_views RPC
+interface IncrementViewsParams {
   listing_id: string;
-};
+}
 
 export const useListings = () => {
   const { user } = useAuth();
@@ -63,7 +65,8 @@ export const useListings = () => {
   const fetchListing = async (id: string): Promise<{ data: Listing | null; error: any }> => {
     setLoading(true);
     try {
-      await supabase.rpc<IncrementViewsParams>('increment_views', { listing_id: id });
+      // Fix the type error by using type assertion for the parameters
+      await supabase.rpc('increment_views', { listing_id: id } as IncrementViewsParams);
 
       const { data, error } = await supabase
         .from('listings')

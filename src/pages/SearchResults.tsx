@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useLocation, Link } from 'react-router-dom';
-import { ChevronLeft, MapPin, Map, List, Filter } from 'lucide-react';
+import { ChevronLeft, MapPin, Map, List, Filter, Search as SearchIcon, Loader } from 'lucide-react';
 
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -9,11 +9,13 @@ import ListingCard from '@/components/ListingCard';
 import SearchFilters from '@/components/SearchFilters';
 import { Button } from '@/components/ui/button';
 import { useSearch } from '@/hooks/useSearch';
+import { useToast } from '@/hooks/use-toast';
 
 const SearchResults = () => {
   const locationRouter = useLocation();
   const { search, results, isLoading } = useSearch();
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
+  const { toast } = useToast();
   
   // Récupération des paramètres de requête
   useEffect(() => {
@@ -22,14 +24,25 @@ const SearchResults = () => {
     const category = params.get('category') || '';
     const locationParam = params.get('location') || '';
     
-    search({
-      query,
+    // Add this check to avoid infinite loop
+    const searchParams = {
+      query: query || undefined,
       categoryId: category || undefined,
       location: locationParam || undefined
-    });
-  }, [locationRouter.search, search]);
+    };
+    
+    // Only search if we have parameters to search with
+    if (query || category || locationParam) {
+      search(searchParams);
+    }
+  }, [locationRouter.search]);
   
   const handleApplyFilters = (filters: any) => {
+    toast({
+      title: 'Filtres appliqués',
+      description: 'Vos résultats ont été mis à jour',
+    });
+    
     search({
       priceMin: filters.priceRange[0],
       priceMax: filters.priceRange[1],
@@ -39,51 +52,60 @@ const SearchResults = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen bg-gray-50">
       <Navbar />
       
       <main className="flex-grow">
         <div className="kiwiiz-container py-8">
           {/* En-tête et navigation */}
           <div className="mb-6">
-            <Link to="/" className="inline-flex items-center text-gray-600 hover:text-kiwiiz-primary mb-2">
-              <ChevronLeft className="h-5 w-5 mr-1" />
+            <Link to="/" className="inline-flex items-center text-gray-600 hover:text-kiwiiz-primary transition-colors mb-2 group">
+              <ChevronLeft className="h-5 w-5 mr-1 group-hover:transform group-hover:-translate-x-1 transition-transform" />
               <span>Retour à l'accueil</span>
             </Link>
-            <h1 className="text-3xl font-bold mb-2">Résultats de recherche</h1>
+            <h1 className="text-3xl font-bold mb-2 text-gray-800">Résultats de recherche</h1>
             
             {/* Récapitulatif de recherche */}
-            <div className="flex flex-wrap items-center gap-2 text-gray-600">
-              {locationRouter.search && (
-                <>
-                  <MapPin className="h-4 w-4" />
-                  {new URLSearchParams(locationRouter.search).get('q') || 'Toutes les annonces'}
-                </>
-              )}
+            <div className="flex flex-wrap items-center gap-2 text-gray-600 bg-white p-3 rounded-md shadow-sm">
+              <SearchIcon className="h-4 w-4 text-kiwiiz-primary" />
+              <span className="font-medium">Recherche:</span>
+              <span className="bg-kiwiiz-light px-2 py-0.5 rounded-full text-kiwiiz-dark">
+                {new URLSearchParams(locationRouter.search).get('q') || 'Toutes les annonces'}
+              </span>
             </div>
           </div>
           
-          {/* Filtres */}
-          <SearchFilters onApplyFilters={handleApplyFilters} />
+          {/* Filters section with better styling */}
+          <div className="mb-6 bg-white rounded-lg shadow-md p-5">
+            <h2 className="text-lg font-medium mb-4 flex items-center">
+              <Filter className="h-5 w-5 mr-2 text-kiwiiz-primary" />
+              Affiner votre recherche
+            </h2>
+            <SearchFilters onApplyFilters={handleApplyFilters} />
+          </div>
           
-          {/* Résultats */}
-          <div className="mb-6 flex justify-between items-center">
+          {/* Résultats with improved header */}
+          <div className="mb-6 flex justify-between items-center bg-white p-4 rounded-lg shadow-sm">
             <div>
-              <p className="text-gray-600">
+              <p className="text-gray-600 font-medium">
                 {isLoading ? (
-                  'Recherche en cours...'
+                  <span className="flex items-center">
+                    <Loader className="h-4 w-4 mr-2 animate-spin" />
+                    Recherche en cours...
+                  </span>
                 ) : (
                   `${results.length} résultat${results.length > 1 ? 's' : ''} trouvé${results.length > 1 ? 's' : ''}`
                 )}
               </p>
             </div>
             
-            <div className="flex items-center gap-2">
+            {/* View mode toggle with improved design */}
+            <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
               <Button
                 variant={viewMode === 'list' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setViewMode('list')}
-                className={viewMode === 'list' ? 'bg-kiwiiz-primary' : ''}
+                className={viewMode === 'list' ? 'bg-kiwiiz-primary text-white' : 'bg-transparent text-gray-600'}
               >
                 <List className="h-4 w-4 mr-1" />
                 Liste
@@ -92,7 +114,7 @@ const SearchResults = () => {
                 variant={viewMode === 'map' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setViewMode('map')}
-                className={viewMode === 'map' ? 'bg-kiwiiz-primary' : ''}
+                className={viewMode === 'map' ? 'bg-kiwiiz-primary text-white' : 'bg-transparent text-gray-600'}
               >
                 <Map className="h-4 w-4 mr-1" />
                 Carte
@@ -100,16 +122,21 @@ const SearchResults = () => {
             </div>
           </div>
           
+          {/* Results display with animations */}
           {isLoading ? (
-            // Afficher un placeholder de chargement
+            // Enhanced loading skeleton
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {[...Array(4)].map((_, i) => (
-                <div key={i} className="rounded-lg overflow-hidden">
+                <div key={i} className="rounded-lg overflow-hidden shadow-md">
                   <div className="bg-gray-200 animate-pulse h-48 w-full"></div>
-                  <div className="p-4 space-y-2">
+                  <div className="p-4 bg-white space-y-2">
                     <div className="bg-gray-200 animate-pulse h-6 w-3/4 rounded"></div>
                     <div className="bg-gray-200 animate-pulse h-4 w-1/2 rounded"></div>
-                    <div className="bg-gray-200 animate-pulse h-4 w-1/4 rounded"></div>
+                    <div className="flex items-center space-x-2 mt-2">
+                      <div className="bg-gray-200 animate-pulse h-4 w-4 rounded-full"></div>
+                      <div className="bg-gray-200 animate-pulse h-4 w-1/4 rounded"></div>
+                    </div>
+                    <div className="bg-gray-200 animate-pulse h-5 w-1/4 rounded mt-2"></div>
                   </div>
                 </div>
               ))}
@@ -118,36 +145,49 @@ const SearchResults = () => {
             results.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {results.map((listing) => (
-                  <ListingCard
-                    key={listing.id}
-                    id={listing.id}
-                    title={listing.title}
-                    price={listing.price}
-                    priceUnit={listing.priceUnit}
-                    imageUrl={listing.imageUrl}
-                    location={listing.location}
-                    category={listing.category}
-                    rating={listing.rating}
-                    distance={listing.distance}
-                  />
+                  <div key={listing.id} className="transform hover:-translate-y-1 transition-all duration-300">
+                    <ListingCard
+                      id={listing.id}
+                      title={listing.title}
+                      price={listing.price}
+                      priceUnit={listing.priceUnit}
+                      imageUrl={listing.imageUrl}
+                      location={listing.location}
+                      category={listing.category}
+                      rating={listing.rating}
+                      distance={listing.distance}
+                    />
+                  </div>
                 ))}
               </div>
             ) : (
-              <div className="text-center py-16">
-                <div className="mb-4">
-                  <Filter className="h-12 w-12 mx-auto text-gray-400" />
+              <div className="text-center py-16 bg-white rounded-lg shadow-sm">
+                <div className="mb-4 bg-kiwiiz-light p-4 rounded-full inline-flex items-center justify-center">
+                  <Filter className="h-12 w-12 text-kiwiiz-primary" />
                 </div>
                 <h2 className="text-xl font-semibold mb-2">Aucun résultat trouvé</h2>
                 <p className="text-gray-600 mb-6">Essayez de modifier vos critères de recherche</p>
-                <Link to="/" className="kiwiiz-btn-primary inline-block">
+                <Link to="/" className="kiwiiz-btn-primary inline-block hover:shadow-md transition-shadow">
                   Retour à l'accueil
                 </Link>
               </div>
             )
           ) : (
-            // Afficher la carte (version simplifiée pour la démo)
-            <div className="bg-gray-100 rounded-lg h-96 flex items-center justify-center">
-              <p className="text-gray-500">Carte interactive - Fonctionnalité à implémenter</p>
+            // Enhanced map placeholder
+            <div className="bg-white rounded-lg shadow-md h-96 flex items-center justify-center overflow-hidden">
+              <div className="text-center p-8">
+                <Map className="h-12 w-12 text-kiwiiz-primary mx-auto mb-4" />
+                <p className="text-gray-700 font-medium">Carte interactive</p>
+                <p className="text-gray-500 text-sm max-w-md mx-auto mt-2">
+                  La vue carte sera bientôt disponible. Elle vous permettra de visualiser les annonces géographiquement.
+                </p>
+                <Button 
+                  variant="outline" 
+                  className="mt-4 border-kiwiiz-primary text-kiwiiz-primary hover:bg-kiwiiz-light"
+                >
+                  Revenir en vue liste
+                </Button>
+              </div>
             </div>
           )}
         </div>

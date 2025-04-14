@@ -32,10 +32,28 @@ serve(async (req) => {
       );
     }
 
-    // Directly update views count with an increment
+    // Get current views count
+    const { data: viewsData, error: viewsError } = await supabaseClient
+      .rpc('get_views', { listing_id })
+      .single();
+
+    if (viewsError) {
+      return new Response(
+        JSON.stringify({ error: viewsError.message }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    // Increment views count
+    const newViewsCount = (viewsData || 0) + 1;
+    
+    // Update views count
     const { data, error } = await supabaseClient
       .from('listings')
-      .update({ views: supabaseClient.rpc('get_views', { listing_id }).then(res => res.data + 1) })
+      .update({ views: newViewsCount })
       .eq('id', listing_id)
       .select('views')
       .single();
