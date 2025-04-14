@@ -65,8 +65,10 @@ export const useListings = () => {
   const fetchListing = async (id: string): Promise<{ data: Listing | null; error: any }> => {
     setLoading(true);
     try {
-      // Fix the type error by using type assertion for the parameters
-      await supabase.rpc('increment_views', { listing_id: id } as IncrementViewsParams);
+      // Fixed: Use type assertion with the defined interface to fix the type error
+      await supabase.functions.invoke('increment-views', {
+        body: { listing_id: id } as IncrementViewsParams
+      });
 
       const { data, error } = await supabase
         .from('listings')
