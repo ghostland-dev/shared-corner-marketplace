@@ -59,7 +59,7 @@ const Navbar = () => {
                 <span>Déposer une annonce</span>
               </Button>
             </Link>
-            <Link to="/connexion">
+            <Link to="/auth">
               <Button variant="outline" className="border-kiwiiz-primary text-kiwiiz-primary flex items-center gap-1">
                 <User className="h-4 w-4" />
                 <span>Connexion</span>
@@ -112,7 +112,7 @@ const Navbar = () => {
             <Link to="/deposer-annonce" className="kiwiiz-btn-primary text-center">
               Déposer une annonce
             </Link>
-            <Link to="/connexion" className="px-4 py-2 border border-kiwiiz-primary text-kiwiiz-primary text-center rounded-md">
+            <Link to="/auth" className="px-4 py-2 border border-kiwiiz-primary text-kiwiiz-primary text-center rounded-md">
               Connexion
             </Link>
           </div>

@@ -60,8 +60,8 @@ export const useListings = () => {
   const fetchListing = async (id: string): Promise<{ data: Listing | null; error: any }> => {
     setLoading(true);
     try {
-      // Incrémenter le compteur de vues
-      await supabase.rpc('increment_views', { listing_id: id });
+      // Increment view count using a proper function call with parameters
+      await supabase.rpc('increment_views', { listing_id: id as any });
       
       const { data, error } = await supabase
         .from('listings')

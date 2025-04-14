@@ -32,11 +32,13 @@ serve(async (req) => {
       );
     }
 
-    // Update views count
+    // Directly update views count with an increment
     const { data, error } = await supabaseClient
       .from('listings')
       .update({ views: supabaseClient.rpc('get_views', { listing_id }).then(res => res.data + 1) })
-      .eq('id', listing_id);
+      .eq('id', listing_id)
+      .select('views')
+      .single();
 
     if (error) {
       return new Response(
@@ -49,7 +51,7 @@ serve(async (req) => {
     }
 
     return new Response(
-      JSON.stringify({ success: true }),
+      JSON.stringify({ success: true, views: data?.views }),
       {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
