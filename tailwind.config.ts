@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,7 +62,18 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+				// Couleurs personnalisées pour notre marketplace
+				kiwiiz: {
+					primary: '#4CAF50',    // Vert principal
+					secondary: '#2196F3',  // Bleu secondaire
+					accent: '#FF9800',     // Orange accent
+					light: '#E8F5E9',      // Vert clair pour fond
+					dark: '#1B5E20',       // Vert foncé
+					'gray-light': '#F5F5F5', 
+					'gray-medium': '#EEEEEE',
+					'gray-dark': '#757575'
+				},
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -70,25 +82,22 @@ export default {
 			},
 			keyframes: {
 				'accordion-down': {
-					from: {
-						height: '0'
-					},
-					to: {
-						height: 'var(--radix-accordion-content-height)'
-					}
+					from: { height: '0' },
+					to: { height: 'var(--radix-accordion-content-height)' }
 				},
 				'accordion-up': {
-					from: {
-						height: 'var(--radix-accordion-content-height)'
-					},
-					to: {
-						height: '0'
-					}
+					from: { height: 'var(--radix-accordion-content-height)' },
+					to: { height: '0' }
+				},
+				fadeIn: {
+					'0%': { opacity: '0' },
+					'100%': { opacity: '1' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'fade-in': 'fadeIn 0.5s ease-in-out'
 			}
 		}
 	},
