@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Search, MapPin, ArrowRight, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,10 +13,28 @@ import HowItWorks from '@/components/HowItWorks';
 import { categories, listings, testimonials } from '@/data/mockData';
 
 const Index = () => {
+  const [searchQuery, setSearchQuery] = useState('');
   const [location, setLocation] = useState('');
+  const navigate = useNavigate();
 
   // On prend quelques annonces pour la page d'accueil
   const featuredListings = listings.slice(0, 4);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    const params = new URLSearchParams();
+    
+    if (searchQuery.trim()) {
+      params.append('q', searchQuery.trim());
+    }
+    
+    if (location.trim()) {
+      params.append('location', location.trim());
+    }
+    
+    navigate(`/recherche?${params.toString()}`);
+  };
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -34,12 +52,14 @@ const Index = () => {
                 Économisez de l'argent et rencontrez vos voisins en louant des objets et services du quotidien
               </p>
               
-              <div className="bg-white p-4 rounded-lg shadow-lg flex flex-col sm:flex-row items-stretch gap-2">
+              <form onSubmit={handleSearch} className="bg-white p-4 rounded-lg shadow-lg flex flex-col sm:flex-row items-stretch gap-2">
                 <div className="relative flex-grow">
                   <Input 
                     type="text" 
                     placeholder="Que cherchez-vous ?" 
                     className="pl-10 bg-gray-50 h-12"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
                   />
                   <Search className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
                 </div>
@@ -53,10 +73,10 @@ const Index = () => {
                   />
                   <MapPin className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
                 </div>
-                <Button className="kiwiiz-btn-accent h-12 sm:w-auto w-full">
+                <Button type="submit" className="kiwiiz-btn-accent h-12 sm:w-auto w-full">
                   Rechercher
                 </Button>
-              </div>
+              </form>
             </div>
           </div>
         </section>
@@ -90,7 +110,7 @@ const Index = () => {
           <div className="kiwiiz-container">
             <div className="flex justify-between items-center mb-8">
               <h2 className="text-2xl font-bold">Découvrez près de chez vous</h2>
-              <Link to="/annonces" className="text-kiwiiz-primary font-medium flex items-center hover:underline">
+              <Link to="/recherche" className="text-kiwiiz-primary font-medium flex items-center hover:underline">
                 Voir tout <ArrowRight className="ml-1 h-4 w-4" />
               </Link>
             </div>
@@ -154,9 +174,11 @@ const Index = () => {
             </div>
             
             <div className="text-center mt-12">
-              <Button className="kiwiiz-btn-primary">
-                Commencer dès maintenant
-              </Button>
+              <Link to="/recherche">
+                <Button className="kiwiiz-btn-primary">
+                  Commencer dès maintenant
+                </Button>
+              </Link>
             </div>
           </div>
         </section>
@@ -174,9 +196,11 @@ const Index = () => {
                   <Calendar className="mr-2 h-5 w-5" />
                   Créer un compte
                 </Button>
-                <Button className="bg-kiwiiz-dark text-white hover:bg-opacity-90">
-                  Déposer une annonce
-                </Button>
+                <Link to="/deposer-annonce">
+                  <Button className="bg-kiwiiz-dark text-white hover:bg-opacity-90">
+                    Déposer une annonce
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>

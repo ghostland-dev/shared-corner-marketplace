@@ -1,11 +1,23 @@
 
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Search, Menu, X, User, Plus } from "lucide-react";
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const navigate = useNavigate();
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      // Dans un vrai scénario, vous redirigeriez vers une page de résultats de recherche
+      console.log("Recherche pour:", searchQuery);
+      // Pour l'instant, naviguer vers les catégories
+      navigate('/categories');
+    }
+  };
 
   return (
     <nav className="bg-white shadow-md relative z-10">
@@ -21,19 +33,25 @@ const Navbar = () => {
 
           {/* Search input - hidden on mobile */}
           <div className="hidden md:block flex-1 max-w-md mx-4">
-            <div className="relative">
-              <input
-                type="text"
-                className="kiwiiz-input pl-10"
-                placeholder="Rechercher un objet, un service..."
-              />
-              <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-            </div>
+            <form onSubmit={handleSearch}>
+              <div className="relative">
+                <input
+                  type="text"
+                  className="kiwiiz-input pl-10"
+                  placeholder="Rechercher un objet, un service..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+              </div>
+            </form>
           </div>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-4">
-            <Button variant="ghost" className="text-kiwiiz-dark">Catégories</Button>
+            <Link to="/categories">
+              <Button variant="ghost" className="text-kiwiiz-dark">Catégories</Button>
+            </Link>
             <Button variant="ghost" className="text-kiwiiz-dark">Comment ça marche</Button>
             <Link to="/deposer-annonce">
               <Button className="kiwiiz-btn-primary flex items-center gap-1">
@@ -66,14 +84,18 @@ const Navbar = () => {
 
         {/* Mobile Search - visible only on mobile */}
         <div className="md:hidden pb-4">
-          <div className="relative">
-            <input
-              type="text"
-              className="kiwiiz-input pl-10"
-              placeholder="Rechercher un objet, un service..."
-            />
-            <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-          </div>
+          <form onSubmit={handleSearch}>
+            <div className="relative">
+              <input
+                type="text"
+                className="kiwiiz-input pl-10"
+                placeholder="Rechercher un objet, un service..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+            </div>
+          </form>
         </div>
       </div>
 

@@ -9,6 +9,8 @@ import Index from "./pages/Index";
 import ListingDetail from "./pages/ListingDetail";
 import CategoryPage from "./pages/CategoryPage";
 import CategoriesList from "./pages/CategoriesList";
+import CreateListing from "./pages/CreateListing";
+import SearchResults from "./pages/SearchResults";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,6 +26,8 @@ const App = () => (
           <Route path="/annonces/:id" element={<ListingDetail />} />
           <Route path="/categories" element={<CategoriesList />} />
           <Route path="/categories/:categoryId" element={<CategoryPage />} />
+          <Route path="/deposer-annonce" element={<CreateListing />} />
+          <Route path="/recherche" element={<SearchResults />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

@@ -1,3 +1,9 @@
+
+import { categories } from './categories';
+
+// Fonction pour générer un ID aléatoire
+const generateId = () => Math.random().toString(36).substring(2, 10);
+
 export const listings = [
   {
     id: "1",
@@ -12,10 +18,27 @@ export const listings = [
     rating: 4.8,
     distance: 0.8,
     owner: {
+      id: generateId(),
       name: "Thomas",
       rating: 4.9,
-      memberSince: "2022"
-    }
+      memberSince: "2022",
+      avatar: "https://randomuser.me/api/portraits/men/32.jpg",
+      responseRate: 98,
+      responseTime: "1h"
+    },
+    features: ["Batterie incluse", "Livraison possible", "État neuf"],
+    availability: {
+      monday: true,
+      tuesday: true,
+      wednesday: true,
+      thursday: true,
+      friday: true,
+      saturday: true,
+      sunday: false
+    },
+    views: 124,
+    rentals: 18,
+    createdAt: "2023-10-12"
   },
   {
     id: "2",
@@ -30,10 +53,27 @@ export const listings = [
     rating: 4.5,
     distance: 2.1,
     owner: {
+      id: generateId(),
       name: "Marie",
       rating: 4.7,
-      memberSince: "2021"
-    }
+      memberSince: "2021",
+      avatar: "https://randomuser.me/api/portraits/women/44.jpg",
+      responseRate: 95,
+      responseTime: "2h"
+    },
+    features: ["Casque fourni", "Antivol inclus", "Batterie chargée"],
+    availability: {
+      monday: true,
+      tuesday: true,
+      wednesday: true,
+      thursday: true,
+      friday: true,
+      saturday: true,
+      sunday: true
+    },
+    views: 245,
+    rentals: 32,
+    createdAt: "2023-11-05"
   },
   {
     id: "3",
@@ -48,10 +88,27 @@ export const listings = [
     rating: 4.9,
     distance: 3.4,
     owner: {
+      id: generateId(),
       name: "Pierre",
       rating: 5.0,
-      memberSince: "2020"
-    }
+      memberSince: "2020",
+      avatar: "https://randomuser.me/api/portraits/men/45.jpg",
+      responseRate: 100,
+      responseTime: "30min"
+    },
+    features: ["Wifi haut débit", "Café gratuit", "Écran tactile", "Parking"],
+    availability: {
+      monday: true,
+      tuesday: true,
+      wednesday: true,
+      thursday: true,
+      friday: true,
+      saturday: false,
+      sunday: false
+    },
+    views: 189,
+    rentals: 47,
+    createdAt: "2023-09-18"
   },
   {
     id: "4",
@@ -66,10 +123,27 @@ export const listings = [
     rating: 5.0,
     distance: 1.2,
     owner: {
+      id: generateId(),
       name: "Sophie",
       rating: 4.8,
-      memberSince: "2021"
-    }
+      memberSince: "2021",
+      avatar: "https://randomuser.me/api/portraits/women/12.jpg",
+      responseRate: 99,
+      responseTime: "1h"
+    },
+    features: ["Diplômée comportementaliste", "Premiers secours animaux", "Promenades incluses"],
+    availability: {
+      monday: true,
+      tuesday: true,
+      wednesday: true,
+      thursday: true,
+      friday: true,
+      saturday: true,
+      sunday: true
+    },
+    views: 312,
+    rentals: 28,
+    createdAt: "2023-12-01"
   },
   {
     id: "5",
@@ -84,10 +158,27 @@ export const listings = [
     rating: 4.7,
     distance: 1.5,
     owner: {
+      id: generateId(),
       name: "Antoine",
       rating: 4.6,
-      memberSince: "2022"
-    }
+      memberSince: "2022",
+      avatar: "https://randomuser.me/api/portraits/men/67.jpg",
+      responseRate: 92,
+      responseTime: "3h"
+    },
+    features: ["Carte mémoire 64GB incluse", "Batterie supplémentaire", "Trépied disponible"],
+    availability: {
+      monday: true,
+      tuesday: true,
+      wednesday: true,
+      thursday: true,
+      friday: true,
+      saturday: true,
+      sunday: false
+    },
+    views: 178,
+    rentals: 23,
+    createdAt: "2024-01-15"
   },
   {
     id: "6",
@@ -102,10 +193,27 @@ export const listings = [
     rating: 4.5,
     distance: 4.2,
     owner: {
+      id: generateId(),
       name: "Jules",
       rating: 4.3,
-      memberSince: "2022"
-    }
+      memberSince: "2022",
+      avatar: "https://randomuser.me/api/portraits/men/22.jpg",
+      responseRate: 85,
+      responseTime: "4h"
+    },
+    features: ["2 manettes", "5 jeux inclus", "Câbles HDMI fournis"],
+    availability: {
+      monday: false,
+      tuesday: true,
+      wednesday: true,
+      thursday: true,
+      friday: true,
+      saturday: true,
+      sunday: true
+    },
+    views: 267,
+    rentals: 19,
+    createdAt: "2024-02-08"
   },
   {
     id: "7",
@@ -120,10 +228,27 @@ export const listings = [
     rating: 4.9,
     distance: 0.6,
     owner: {
+      id: generateId(),
       name: "Lucas",
       rating: 4.9,
-      memberSince: "2020"
-    }
+      memberSince: "2020",
+      avatar: "https://randomuser.me/api/portraits/men/55.jpg",
+      responseRate: 97,
+      responseTime: "1h"
+    },
+    features: ["Diable et sangles fournis", "Assurance professionnelle", "Monte-charge disponible"],
+    availability: {
+      monday: false,
+      tuesday: false,
+      wednesday: false,
+      thursday: false,
+      friday: true,
+      saturday: true,
+      sunday: true
+    },
+    views: 204,
+    rentals: 41,
+    createdAt: "2023-08-25"
   },
   {
     id: "8",
@@ -138,9 +263,26 @@ export const listings = [
     rating: 4.6,
     distance: 2.8,
     owner: {
+      id: generateId(),
       name: "Emma",
       rating: 4.7,
-      memberSince: "2021"
-    }
+      memberSince: "2021",
+      avatar: "https://randomuser.me/api/portraits/women/33.jpg",
+      responseRate: 94,
+      responseTime: "2h"
+    },
+    features: ["Housse de transport", "Accordeur inclus", "Médiators fournis"],
+    availability: {
+      monday: true,
+      tuesday: true,
+      wednesday: true,
+      thursday: true,
+      friday: true,
+      saturday: true,
+      sunday: false
+    },
+    views: 156,
+    rentals: 15,
+    createdAt: "2024-01-03"
   }
 ];

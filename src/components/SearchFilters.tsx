@@ -4,27 +4,28 @@ import { Slider } from "@/components/ui/slider";
 import { Filter, ChevronDown, ChevronUp, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { categories } from '@/data/categories';
 
 interface FilterProps {
   onApplyFilters: (filters: any) => void;
+  initialFilters?: {
+    priceRange?: [number, number];
+    distance?: number;
+    categories?: string[];
+  };
 }
 
-const SearchFilters = ({ onApplyFilters }: FilterProps) => {
+const SearchFilters = ({ onApplyFilters, initialFilters }: FilterProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [priceRange, setPriceRange] = useState([0, 200]);
-  const [distance, setDistance] = useState(10);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [priceRange, setPriceRange] = useState(initialFilters?.priceRange || [0, 200]);
+  const [distance, setDistance] = useState(initialFilters?.distance || 10);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(initialFilters?.categories || []);
 
-  const categories = [
-    "Bricolage", "Jardinage", "Cuisine", "Transport",
-    "Électronique", "Sport", "Loisirs", "Vêtements"
-  ];
-
-  const toggleCategory = (category: string) => {
-    if (selectedCategories.includes(category)) {
-      setSelectedCategories(selectedCategories.filter(c => c !== category));
+  const toggleCategory = (categoryId: string) => {
+    if (selectedCategories.includes(categoryId)) {
+      setSelectedCategories(selectedCategories.filter(c => c !== categoryId));
     } else {
-      setSelectedCategories([...selectedCategories, category]);
+      setSelectedCategories([...selectedCategories, categoryId]);
     }
   };
 
@@ -40,6 +41,9 @@ const SearchFilters = ({ onApplyFilters }: FilterProps) => {
       distance,
       categories: selectedCategories
     });
+    
+    // Optionnellement, fermer les filtres après application
+    // setIsOpen(false);
   };
 
   return (
@@ -67,6 +71,7 @@ const SearchFilters = ({ onApplyFilters }: FilterProps) => {
               <h4 className="font-medium mb-4">Prix (€)</h4>
               <Slider 
                 defaultValue={priceRange}
+                value={priceRange}
                 max={200}
                 step={5}
                 onValueChange={setPriceRange}
@@ -83,6 +88,7 @@ const SearchFilters = ({ onApplyFilters }: FilterProps) => {
               <h4 className="font-medium mb-4">Distance maximale (km)</h4>
               <Slider 
                 defaultValue={[distance]} 
+                value={[distance]}
                 max={50}
                 step={1}
                 onValueChange={(value) => setDistance(value[0])}
@@ -100,14 +106,15 @@ const SearchFilters = ({ onApplyFilters }: FilterProps) => {
             <h4 className="font-medium mb-4">Catégories</h4>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {categories.map((category) => (
-                <div key={category} className="flex items-center space-x-2">
+                <div key={category.id} className="flex items-center space-x-2">
                   <Checkbox 
-                    id={`category-${category}`}
-                    checked={selectedCategories.includes(category)}
-                    onCheckedChange={() => toggleCategory(category)}
+                    id={`category-${category.id}`}
+                    checked={selectedCategories.includes(category.id)}
+                    onCheckedChange={() => toggleCategory(category.id)}
                   />
-                  <label htmlFor={`category-${category}`} className="text-sm cursor-pointer">
-                    {category}
+                  <label htmlFor={`category-${category.id}`} className="text-sm cursor-pointer flex items-center">
+                    <category.icon className="h-4 w-4 mr-1 text-gray-500" />
+                    {category.name}
                   </label>
                 </div>
               ))}
