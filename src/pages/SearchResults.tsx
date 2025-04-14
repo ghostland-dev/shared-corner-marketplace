@@ -11,23 +11,23 @@ import { Button } from '@/components/ui/button';
 import { useSearch } from '@/hooks/useSearch';
 
 const SearchResults = () => {
-  const location = useLocation();
+  const locationRouter = useLocation();
   const { search, results, isLoading } = useSearch();
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
   
   // Récupération des paramètres de requête
   useEffect(() => {
-    const params = new URLSearchParams(location.search);
+    const params = new URLSearchParams(locationRouter.search);
     const query = params.get('q') || '';
     const category = params.get('category') || '';
-    const location = params.get('location') || '';
+    const locationParam = params.get('location') || '';
     
     search({
       query,
       categoryId: category || undefined,
-      location: location || undefined
+      location: locationParam || undefined
     });
-  }, [location.search, search]);
+  }, [locationRouter.search, search]);
   
   const handleApplyFilters = (filters: any) => {
     search({
@@ -54,10 +54,10 @@ const SearchResults = () => {
             
             {/* Récapitulatif de recherche */}
             <div className="flex flex-wrap items-center gap-2 text-gray-600">
-              {location.search && (
+              {locationRouter.search && (
                 <>
                   <MapPin className="h-4 w-4" />
-                  {new URLSearchParams(location.search).get('q') || 'Toutes les annonces'}
+                  {new URLSearchParams(locationRouter.search).get('q') || 'Toutes les annonces'}
                 </>
               )}
             </div>
