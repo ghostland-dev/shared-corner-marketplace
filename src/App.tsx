@@ -14,6 +14,13 @@ import CreateListing from "./pages/CreateListing";
 import SearchResults from "./pages/SearchResults";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
+import Contact from "./pages/Contact";
+import FAQ from "./pages/FAQ";
+import HowItWorks from "./pages/HowItWorks";
+import TermsOfService from "./pages/legal/TermsOfService";
+import PrivacyPolicy from "./pages/legal/PrivacyPolicy";
+import LegalNotice from "./pages/legal/LegalNotice";
+import CookiePolicy from "./pages/legal/CookiePolicy";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +39,13 @@ const App = () => (
             <Route path="/categories/:categoryId" element={<CategoryPage />} />
             <Route path="/deposer-annonce" element={<CreateListing />} />
             <Route path="/recherche" element={<SearchResults />} />
+            <Route path="/comment-ca-marche" element={<HowItWorks />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/faq" element={<FAQ />} />
+            <Route path="/conditions-generales" element={<TermsOfService />} />
+            <Route path="/politique-confidentialite" element={<PrivacyPolicy />} />
+            <Route path="/mentions-legales" element={<LegalNotice />} />
+            <Route path="/cookies" element={<CookiePolicy />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
