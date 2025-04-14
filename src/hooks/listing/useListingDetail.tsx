@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Listing } from '@/types/supabase';
+import { useToast } from '@/hooks/use-toast';
 
 interface IncrementViewsBody {
   listing_id: string;
@@ -9,6 +10,7 @@ interface IncrementViewsBody {
 
 export const useListingDetail = () => {
   const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
 
   const fetchListing = async (id: string): Promise<{ data: Listing | null; error: any }> => {
     setLoading(true);
@@ -46,12 +48,22 @@ export const useListingDetail = () => {
 
       if (error) {
         console.error('Error fetching listing:', error);
+        toast({
+          title: "Erreur",
+          description: "Impossible de charger l'annonce",
+          variant: "destructive",
+        });
         return { data: null, error };
       }
 
       return { data: data as Listing, error: null };
     } catch (error) {
       console.error('Error in fetchListing:', error);
+      toast({
+        title: "Erreur",
+        description: "Une erreur s'est produite lors du chargement de l'annonce",
+        variant: "destructive",
+      });
       return { data: null, error };
     } finally {
       setLoading(false);

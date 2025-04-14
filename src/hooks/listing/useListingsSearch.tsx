@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Listing } from '@/types/supabase';
+import { useToast } from '@/hooks/use-toast';
 
 export type ListingOptions = {
   category?: string;
@@ -12,6 +13,7 @@ export type ListingOptions = {
 
 export const useListingsSearch = () => {
   const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
 
   const fetchListings = async (options: ListingOptions = {}): Promise<{ data: Listing[]; count: number; error: any }> => {
     setLoading(true);
@@ -41,12 +43,22 @@ export const useListingsSearch = () => {
 
       if (error) {
         console.error('Error fetching listings:', error);
+        toast({
+          title: "Erreur",
+          description: "Impossible de charger les annonces",
+          variant: "destructive",
+        });
         return { data: [], count: 0, error };
       }
 
       return { data: data as Listing[], count: count || 0, error: null };
     } catch (error) {
       console.error('Error in fetchListings:', error);
+      toast({
+        title: "Erreur",
+        description: "Une erreur s'est produite lors du chargement des annonces",
+        variant: "destructive",
+      });
       return { data: [], count: 0, error };
     } finally {
       setLoading(false);
