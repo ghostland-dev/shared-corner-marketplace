@@ -12,8 +12,8 @@ type ListingOptions = {
   page?: number;
 };
 
-// Define the type explicitly for the increment_views RPC
-interface IncrementViewsParams {
+// Define the type explicitly for increment-views function body
+interface IncrementViewsBody {
   listing_id: string;
 }
 
@@ -65,9 +65,9 @@ export const useListings = () => {
   const fetchListing = async (id: string): Promise<{ data: Listing | null; error: any }> => {
     setLoading(true);
     try {
-      // Fixed: Use type assertion with the defined interface to fix the type error
+      // Fixed: Properly type the function body
       await supabase.functions.invoke('increment-views', {
-        body: { listing_id: id } as IncrementViewsParams
+        body: { listing_id: id } as IncrementViewsBody
       });
 
       const { data, error } = await supabase
