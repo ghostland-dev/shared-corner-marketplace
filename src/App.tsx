@@ -30,14 +30,20 @@ import LegalNotice from "./pages/legal/LegalNotice";
 import CookiePolicy from "./pages/legal/CookiePolicy";
 import { Messages } from "./pages/Messages";
 import MyReservations from "./pages/MyReservations";
+import { SuperAdminDashboard } from "./pages/admin/SuperAdminDashboard";
 
 
 
-const App = () => (
-  <TooltipProvider>
-    <Toaster />
-    <Sonner />
-    <Routes>
+const App = () => {
+  const queryClient = new QueryClient();
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/annonces/:id" element={<ListingDetail />} />
@@ -63,9 +69,13 @@ const App = () => (
             <Route path="/politique-confidentialite" element={<PrivacyPolicy />} />
             <Route path="/mentions-legales" element={<LegalNotice />} />
             <Route path="/cookies" element={<CookiePolicy />} />
+            <Route path="/admin" element={<SuperAdminDashboard />} />
             <Route path="*" element={<NotFound />} />
-    </Routes>
-  </TooltipProvider>
-);
+          </Routes>
+        </TooltipProvider>
+      </AuthProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
