@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Star, User, Calendar, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,16 +15,25 @@ import { safeProp } from '@/lib/safety-utils';
 interface ReviewsSectionProps {
   listingId: string;
   ownerId: string;
+  listingTitle?: string;
+  className?: string;
 }
 
-export const ReviewsSection: React.FC<ReviewsSectionProps> = ({ listingId, ownerId }) => {
+export const ReviewsSection: React.FC<ReviewsSectionProps> = ({ listingId, ownerId, listingTitle, className }) => {
   const { user } = useAuth();
-  const { reviews, loading, createReview } = useReviews();
+  const { reviews, loading, createReview, loadReviews, getAverageRating } = useReviews();
   const { toast } = useToast();
   const [newRating, setNewRating] = useState(5);
   const [newComment, setNewComment] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+
+  React.useEffect(() => {
+    // Charger les avis pour cette annonce
+    if (listingId) {
+      loadReviews(listingId);
+    }
+  }, [listingId, loadReviews]);
 
   const canAddReview = user && user.id !== ownerId;
 
@@ -112,7 +121,7 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({ listingId, owner
   }
 
   return (
-    <Card>
+    <Card className={className}>
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
@@ -204,7 +213,7 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({ listingId, owner
           </div>
         ) : (
           <div className="space-y-4">
-            {safeProp(reviews, []).map((review) => (
+            {reviews.map((review) => (
               <div key={safeProp(review, 'id', '')} className="space-y-3">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
@@ -213,8 +222,8 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({ listingId, owner
                     </div>
                     <div>
                       <p className="font-medium">
-                        {safeProp(review, 'profiles.full_name') || 
-                         safeProp(review, 'profiles.username') || 'Utilisateur'}
+                        {safeProp(review, 'reviewer_profile.full_name') || 
+                         safeProp(review, 'reviewer_profile.username') || 'Utilisateur'}
                       </p>
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Calendar className="h-3 w-3" />

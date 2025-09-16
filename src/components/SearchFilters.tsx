@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Filter, SlidersHorizontal, Map } from 'lucide-react';
+import { Search, SlidersHorizontal, Map } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -7,63 +7,121 @@ import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { categories } from '@/data/categories';
 
-interface SearchFiltersProps {
+export type FilterState = {
   query: string;
-  onQueryChange: (query: string) => void;
   location: string;
-  onLocationChange: (location: string) => void;
   category: string;
-  onCategoryChange: (category: string) => void;
-  minPrice: number;
-  maxPrice: number;
-  onPriceChange: (min: number, max: number) => void;
   priceRange: [number, number];
-  onSearch: () => void;
-  resultsCount: number;
+  priceUnit?: string;
+  features?: string[];
+  sortBy?: 'price_asc' | 'price_desc' | 'date_desc' | 'popularity';
+};
+
+interface SearchFiltersProps {
+  // Controlled props (optional for backward compatibility)
+  query?: string;
+  onQueryChange?: (query: string) => void;
+  location?: string;
+  onLocationChange?: (location: string) => void;
+  category?: string;
+  onCategoryChange?: (category: string) => void;
+  priceRange?: [number, number];
+  onPriceChange?: (min: number, max: number) => void;
+
+  // Summary and actions
+  onSearch?: () => void;
+  resultsCount?: number;
   loading?: boolean;
+
+  // Uncontrolled mode callback
+  onFiltersChange?: (filters: FilterState) => void;
 }
 
 export const SearchFilters: React.FC<SearchFiltersProps> = ({
-  query,
+  query: controlledQuery,
   onQueryChange,
-  location,
+  location: controlledLocation,
   onLocationChange,
-  category,
+  category: controlledCategory,
   onCategoryChange,
-  minPrice,
-  maxPrice,
+  priceRange: controlledPriceRange,
   onPriceChange,
-  priceRange,
   onSearch,
-  resultsCount,
-  loading = false
+  resultsCount = 0,
+  loading = false,
+  onFiltersChange,
 }) => {
+  // Internal state (works for both controlled and uncontrolled usage)
+  const [query, setQuery] = React.useState(controlledQuery ?? '');
+  const [location, setLocation] = React.useState(controlledLocation ?? '');
+  const [category, setCategory] = React.useState(controlledCategory ?? '');
+  const [priceRange, setPriceRange] = React.useState<[number, number]>(controlledPriceRange ?? [0, 1000]);
   const [isFilterDialogOpen, setIsFilterDialogOpen] = React.useState(false);
-  const [tempPriceRange, setTempPriceRange] = React.useState<[number, number]>(priceRange);
+
+  // Sync internal state when controlled props change
+  React.useEffect(() => { if (controlledQuery !== undefined) setQuery(controlledQuery); }, [controlledQuery]);
+  React.useEffect(() => { if (controlledLocation !== undefined) setLocation(controlledLocation); }, [controlledLocation]);
+  React.useEffect(() => { if (controlledCategory !== undefined) setCategory(controlledCategory); }, [controlledCategory]);
+  React.useEffect(() => { if (controlledPriceRange !== undefined) setPriceRange(controlledPriceRange); }, [controlledPriceRange]);
+
+  const emitFiltersChange = (next: Partial<FilterState> = {}) => {
+    const filters: FilterState = {
+      query,
+      location,
+      category,
+      priceRange,
+      priceUnit: 'jour',
+      features: [],
+      sortBy: 'date_desc',
+      ...next,
+    };
+    onFiltersChange?.(filters);
+  };
+
+  const handleQueryChange = (val: string) => {
+    setQuery(val);
+    onQueryChange?.(val);
+    emitFiltersChange({ query: val });
+  };
+
+  const handleLocationChange = (val: string) => {
+    setLocation(val);
+    onLocationChange?.(val);
+    emitFiltersChange({ location: val });
+  };
+
+  const handleCategoryChange = (val: string) => {
+    setCategory(val);
+    onCategoryChange?.(val);
+    emitFiltersChange({ category: val });
+  };
 
   const handlePriceRangeChange = (values: number[]) => {
-    setTempPriceRange([values[0], values[1]]);
+    const next: [number, number] = [values[0], values[1]];
+    setPriceRange(next);
+    onPriceChange?.(next[0], next[1]);
+    emitFiltersChange({ priceRange: next });
   };
 
   const applyFilters = () => {
-    onPriceChange(tempPriceRange[0], tempPriceRange[1]);
-    onSearch();
+    onPriceChange?.(priceRange[0], priceRange[1]);
+    emitFiltersChange();
+    onSearch?.();
     setIsFilterDialogOpen(false);
   };
 
   const resetFilters = () => {
-    onQueryChange('');
-    onLocationChange('');
-    onCategoryChange('');
-    onPriceChange(0, 1000);
-    setTempPriceRange([0, 1000]);
+    handleQueryChange('');
+    handleLocationChange('');
+    handleCategoryChange('');
+    handlePriceRangeChange([0, 1000]);
   };
 
-  const hasActiveFilters = query || location || category || minPrice > 0 || maxPrice < 1000;
+  const hasActiveFilters = !!(query || location || category || priceRange[0] > 0 || priceRange[1] < 1000);
 
   return (
     <div className="space-y-4">
@@ -78,9 +136,9 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
                 type="text"
                 placeholder="Que cherchez-vous ?"
                 value={query}
-                onChange={(e) => onQueryChange(e.target.value)}
+                onChange={(e) => handleQueryChange(e.target.value)}
                 className="pl-10"
-                onKeyPress={(e) => e.key === 'Enter' && onSearch()}
+                onKeyDown={(e) => e.key === 'Enter' && onSearch?.()}
               />
             </div>
 
@@ -91,14 +149,14 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
                 type="text"
                 placeholder="Où ?"
                 value={location}
-                onChange={(e) => onLocationChange(e.target.value)}
+                onChange={(e) => handleLocationChange(e.target.value)}
                 className="pl-10"
-                onKeyPress={(e) => e.key === 'Enter' && onSearch()}
+                onKeyDown={(e) => e.key === 'Enter' && onSearch?.()}
               />
             </div>
 
             {/* Category Select */}
-            <Select value={category} onValueChange={onCategoryChange}>
+            <Select value={category} onValueChange={handleCategoryChange}>
               <SelectTrigger className="md:w-48">
                 <SelectValue placeholder="Catégorie" />
               </SelectTrigger>
@@ -119,9 +177,7 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
                   <SlidersHorizontal className="h-4 w-4 mr-2" />
                   Filtres
                   {hasActiveFilters && (
-                    <Badge className="absolute -top-2 -right-2 h-5 w-5 p-0 text-xs">
-                      !
-                    </Badge>
+                    <Badge className="absolute -top-2 -right-2 h-5 w-5 p-0 text-xs">!</Badge>
                   )}
                 </Button>
               </DialogTrigger>
@@ -129,15 +185,15 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
                 <DialogHeader>
                   <DialogTitle>Filtres de recherche</DialogTitle>
                 </DialogHeader>
-                
+
                 <div className="space-y-6 py-4">
                   {/* Price Range */}
                   <div className="space-y-3">
                     <Label className="text-sm font-medium">
-                      Prix par jour : {tempPriceRange[0]}€ - {tempPriceRange[1]}€
+                      Prix par jour : {priceRange[0]}€ - {priceRange[1]}€
                     </Label>
                     <Slider
-                      value={tempPriceRange}
+                      value={priceRange}
                       onValueChange={handlePriceRangeChange}
                       max={1000}
                       min={0}
@@ -156,60 +212,37 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
                   <div className="space-y-2">
                     <Label className="text-sm font-medium">Filtres actifs</Label>
                     <div className="flex flex-wrap gap-2">
-                      {query && (
-                        <Badge variant="secondary">
-                          Recherche: "{query}"
-                        </Badge>
-                      )}
-                      {location && (
-                        <Badge variant="secondary">
-                          Lieu: {location}
-                        </Badge>
-                      )}
+                      {query && <Badge variant="secondary">Recherche: "{query}"</Badge>}
+                      {location && <Badge variant="secondary">Lieu: {location}</Badge>}
                       {category && (
-                        <Badge variant="secondary">
-                          {categories.find(c => c.id === category)?.name}
-                        </Badge>
+                        <Badge variant="secondary">{categories.find((c) => c.id === category)?.name}</Badge>
                       )}
-                      {(minPrice > 0 || maxPrice < 1000) && (
-                        <Badge variant="secondary">
-                          Prix: {minPrice}€ - {maxPrice}€
-                        </Badge>
+                      {(priceRange[0] > 0 || priceRange[1] < 1000) && (
+                        <Badge variant="secondary">Prix: {priceRange[0]}€ - {priceRange[1]}€</Badge>
                       )}
                       {!hasActiveFilters && (
-                        <span className="text-sm text-muted-foreground">
-                          Aucun filtre actif
-                        </span>
+                        <span className="text-sm text-muted-foreground">Aucun filtre actif</span>
                       )}
                     </div>
                   </div>
                 </div>
 
                 <div className="flex justify-between gap-2">
-                  <Button
-                    variant="outline"
-                    onClick={resetFilters}
-                    disabled={!hasActiveFilters}
-                  >
+                  <Button variant="outline" onClick={resetFilters} disabled={!hasActiveFilters}>
                     Réinitialiser
                   </Button>
                   <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      onClick={() => setIsFilterDialogOpen(false)}
-                    >
+                    <Button variant="outline" onClick={() => setIsFilterDialogOpen(false)}>
                       Annuler
                     </Button>
-                    <Button onClick={applyFilters}>
-                      Appliquer
-                    </Button>
+                    <Button onClick={applyFilters}>Appliquer</Button>
                   </div>
                 </div>
               </DialogContent>
             </Dialog>
 
             {/* Search Button */}
-            <Button onClick={onSearch} disabled={loading} className="md:w-auto">
+            <Button onClick={() => onSearch?.()} disabled={loading} className="md:w-auto">
               {loading ? (
                 <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent mr-2" />
               ) : (
@@ -224,25 +257,17 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
       {/* Results Summary */}
       <div className="flex items-center justify-between text-sm text-muted-foreground">
         <div>
-          {loading ? (
-            <span>Recherche en cours...</span>
-          ) : (
+          {loading ? <span>Recherche en cours...</span> : (
             <span>
-              {resultsCount > 0 
+              {resultsCount > 0
                 ? `${resultsCount} résultat${resultsCount > 1 ? 's' : ''} trouvé${resultsCount > 1 ? 's' : ''}`
-                : 'Aucun résultat trouvé'
-              }
+                : 'Aucun résultat trouvé'}
             </span>
           )}
         </div>
 
         {hasActiveFilters && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={resetFilters}
-            className="h-auto p-1 text-xs"
-          >
+          <Button variant="ghost" size="sm" onClick={resetFilters} className="h-auto p-1 text-xs">
             Effacer les filtres
           </Button>
         )}

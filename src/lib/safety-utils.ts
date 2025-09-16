@@ -124,6 +124,22 @@ export const handleError = (error: any, context: string = 'Unknown'): void => {
   }
 };
 
+// Accès sécurisé à une propriété imbriquée avec chemin type "a.b.c"
+export const safeProp = <T = any>(obj: any, path: string, defaultValue?: T): T => {
+  try {
+    if (!obj || typeof path !== 'string' || !path) return defaultValue as T;
+    const parts = path.split('.');
+    let current: any = obj;
+    for (const key of parts) {
+      if (current == null) return defaultValue as T;
+      current = current[key];
+    }
+    return (current === undefined || current === null) ? (defaultValue as T) : (current as T);
+  } catch {
+    return defaultValue as T;
+  }
+};
+
 // Debounce pour les recherches
 export const debounce = <T extends (...args: any[]) => any>(
   func: T,
