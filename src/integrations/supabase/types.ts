@@ -91,6 +91,33 @@ export type Database = {
           },
         ]
       }
+      companies: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          manager_id: string | null
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          manager_id?: string | null
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          manager_id?: string | null
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       conversations: {
         Row: {
           created_at: string
@@ -158,6 +185,7 @@ export type Database = {
       listings: {
         Row: {
           category_id: string
+          company_id: string | null
           created_at: string
           description: string | null
           features: string[] | null
@@ -174,6 +202,7 @@ export type Database = {
         }
         Insert: {
           category_id: string
+          company_id?: string | null
           created_at?: string
           description?: string | null
           features?: string[] | null
@@ -190,6 +219,7 @@ export type Database = {
         }
         Update: {
           category_id?: string
+          company_id?: string | null
           created_at?: string
           description?: string | null
           features?: string[] | null
@@ -204,7 +234,15 @@ export type Database = {
           updated_at?: string
           views?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "listings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       messages: {
         Row: {
@@ -273,6 +311,53 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      payments: {
+        Row: {
+          amount: number
+          created_at: string | null
+          currency: string | null
+          external_payment_id: string | null
+          id: string
+          metadata: Json | null
+          payment_method: string | null
+          reservation_id: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          currency?: string | null
+          external_payment_id?: string | null
+          id?: string
+          metadata?: Json | null
+          payment_method?: string | null
+          reservation_id?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          currency?: string | null
+          external_payment_id?: string | null
+          id?: string
+          metadata?: Json | null
+          payment_method?: string | null
+          reservation_id?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "reservations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
