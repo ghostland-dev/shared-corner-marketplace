@@ -63,16 +63,42 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', userId)
+        .eq('user_id', userId)
         .single();
 
       if (error) {
         console.error('Error fetching profile:', error);
+        // If profile doesn't exist, create one
+        if (error.code === 'PGRST116') {
+          await createProfile(userId);
+        }
       } else if (data) {
         setProfile(data as Profile);
       }
     } catch (error) {
       console.error('Error in fetchProfile:', error);
+    }
+  };
+
+  const createProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .insert({
+          user_id: userId,
+          full_name: user?.user_metadata?.full_name || 'Utilisateur',
+          username: user?.user_metadata?.username || `user_${userId.substring(0, 8)}`
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error creating profile:', error);
+      } else if (data) {
+        setProfile(data as Profile);
+      }
+    } catch (error) {
+      console.error('Error in createProfile:', error);
     }
   };
 
@@ -145,7 +171,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const { error } = await supabase
         .from('profiles')
         .update(data)
-        .eq('id', user.id);
+        .eq('user_id', user.id);
 
       if (error) {
         toast({

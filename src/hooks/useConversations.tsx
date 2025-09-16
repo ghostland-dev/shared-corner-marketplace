@@ -325,15 +325,32 @@ export const useConversations = () => {
           schema: 'public',
           table: 'messages',
         },
-        (payload) => {
+        async (payload) => {
           const newMessage = payload.new as Message;
           
           // Si le message n'est pas de l'utilisateur actuel
           if (newMessage.sender_id !== user.id) {
+            // Récupérer le profil de l'expéditeur
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('user_id, username, full_name, avatar_url')
+              .eq('user_id', newMessage.sender_id)
+              .single();
+
+            const messageWithProfile = {
+              ...newMessage,
+              sender: profile ? {
+                id: profile.user_id,
+                username: profile.username,
+                full_name: profile.full_name,
+                avatar_url: profile.avatar_url
+              } : null
+            };
+
             setMessages(prev => {
               // Vérifier si le message appartient à la conversation actuellement affichée
               if (prev.length > 0 && prev[0].conversation_id === newMessage.conversation_id) {
-                return [...prev, newMessage];
+                return [...prev, messageWithProfile];
               }
               return prev;
             });
