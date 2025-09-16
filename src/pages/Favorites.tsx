@@ -11,12 +11,20 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Listing } from '@/types/supabase';
 
+type ListingWithProfile = Listing & {
+  profiles?: {
+    username: string | null;
+    full_name: string | null;
+    avatar_url: string | null;
+  };
+};
+
 type Favorite = {
   id: string;
   user_id: string;
   listing_id: string;
   created_at: string;
-  listing: Listing;
+  listing: ListingWithProfile;
 };
 
 const Favorites = () => {
