@@ -78,11 +78,8 @@ const MyReservations = () => {
         .from('reservations')
         .select(`
           *,
-          listing:listings(
+          listing:listings!inner(
             id, title, image_urls, price, price_unit, owner_id
-          ),
-          renter_profile:profiles!reservations_renter_id_fkey(
-            id, username, full_name, avatar_url
           )
         `)
         .eq('listing.owner_id', user.id)
@@ -90,8 +87,23 @@ const MyReservations = () => {
 
       if (receivedError) throw receivedError;
 
+      // Manually fetch renter profiles for received reservations
+      let receivedWithProfiles = receivedRes || [];
+      if (receivedRes && receivedRes.length > 0) {
+        const renterIds = [...new Set(receivedRes.map(r => r.renter_id))];
+        const { data: renterProfiles } = await supabase
+          .from('profiles')
+          .select('user_id, username, full_name, avatar_url')
+          .in('user_id', renterIds);
+
+        receivedWithProfiles = receivedRes.map(res => ({
+          ...res,
+          renter_profile: renterProfiles?.find(p => p.user_id === res.renter_id) || null
+        }));
+      }
+
       setMyReservations(myRes || []);
-      setReceivedReservations(receivedRes || []);
+      setReceivedReservations(receivedWithProfiles);
     } catch (error) {
       console.error('Erreur lors du chargement des réservations:', error);
       toast({
