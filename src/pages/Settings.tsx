@@ -25,6 +25,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useFileUpload } from '@/hooks/useFileUpload';
 import { supabase } from '@/integrations/supabase/client';
+import { VerificationPanel } from '@/components/VerificationPanel';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
@@ -187,10 +188,14 @@ const Settings = () => {
           </div>
 
           <Tabs defaultValue="profile" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="profile" className="flex items-center gap-2">
                 <User className="w-4 h-4" />
                 Profil
+              </TabsTrigger>
+              <TabsTrigger value="verification" className="flex items-center gap-2">
+                <Shield className="w-4 h-4" />
+                Vérifications
               </TabsTrigger>
               <TabsTrigger value="notifications" className="flex items-center gap-2">
                 <Bell className="w-4 h-4" />
@@ -311,6 +316,11 @@ const Settings = () => {
                   </Button>
                 </CardContent>
               </Card>
+            </TabsContent>
+
+            {/* Onglet Vérifications */}
+            <TabsContent value="verification">
+              <VerificationPanel />
             </TabsContent>
 
             {/* Onglet Notifications */}

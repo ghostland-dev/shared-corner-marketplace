@@ -290,6 +290,7 @@ const ListingDetail = () => {
               <ReviewsSection 
                 listingId={listing.id} 
                 ownerId={listing.owner_id}
+                listingTitle={listing.title}
                 className="mt-8"
               />
             </div>

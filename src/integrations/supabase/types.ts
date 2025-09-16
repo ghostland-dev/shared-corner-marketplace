@@ -324,6 +324,39 @@ export type Database = {
           },
         ]
       }
+      user_verifications: {
+        Row: {
+          created_at: string
+          id: string
+          metadata: Json | null
+          status: string
+          updated_at: string
+          user_id: string
+          verification_type: string
+          verified_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          status?: string
+          updated_at?: string
+          user_id: string
+          verification_type: string
+          verified_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+          verification_type?: string
+          verified_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

@@ -215,9 +215,6 @@ const MyReservations = () => {
                   <CheckCircle className="w-4 h-4 mr-1" />
                   Accepter
                 </Button>
-                  <CheckCircle className="w-4 h-4 mr-1" />
-                  Accepter
-                </Button>
                 <Button
                   size="sm"
                   variant="outline"

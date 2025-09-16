@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { Star, MessageSquare, User as UserIcon } from 'lucide-react';
+import { Star, MessageSquare, User as UserIcon, CheckCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -9,16 +9,19 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { useReviews, Review } from '@/hooks/useReviews';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ReviewsSectionProps {
   listingId: string;
   ownerId: string;
+  listingTitle?: string;
   className?: string;
 }
 
 export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
   listingId,
   ownerId,
+  listingTitle,
   className
 }) => {
   const { user } = useAuth();
@@ -28,14 +31,37 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewComment, setReviewComment] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [hasCompletedReservation, setHasCompletedReservation] = useState(false);
 
   useEffect(() => {
     loadReviews(listingId);
     
     if (user) {
-      canUserReview(listingId).then(setCanReview);
+      checkUserReviewEligibility();
     }
   }, [listingId, user]);
+
+  const checkUserReviewEligibility = async () => {
+    const canReviewListing = await canUserReview(listingId);
+    setCanReview(canReviewListing);
+    
+    // Vérifier s'il y a une réservation terminée
+    if (user) {
+      try {
+        const { data } = await supabase
+          .from('reservations')
+          .select('id')
+          .eq('listing_id', listingId)
+          .eq('renter_id', user.id)
+          .eq('status', 'completed')
+          .maybeSingle();
+        
+        setHasCompletedReservation(!!data);
+      } catch (error) {
+        console.error('Error checking reservation:', error);
+      }
+    }
+  };
 
   const handleSubmitReview = async () => {
     if (!user) return;
@@ -94,12 +120,32 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
         
         <CardContent className="space-y-6">
           {/* Formulaire d'avis */}
-          {canReview && user && (
+          {user && user.id !== ownerId && (
             <div className="space-y-4 p-4 bg-muted/50 rounded-lg">
-              {!showReviewForm ? (
-                <Button onClick={() => setShowReviewForm(true)}>
-                  Laisser un avis
-                </Button>
+              {!hasCompletedReservation ? (
+                <div className="text-center py-4">
+                  <MessageSquare className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground">
+                    Vous devez avoir terminé une réservation pour laisser un avis
+                  </p>
+                </div>
+              ) : !canReview ? (
+                <div className="text-center py-4">
+                  <CheckCircle className="w-8 h-8 mx-auto mb-2 text-success" />
+                  <p className="text-sm text-muted-foreground">
+                    Vous avez déjà laissé un avis pour cette annonce
+                  </p>
+                </div>
+              ) : !showReviewForm ? (
+                <div className="text-center">
+                  <Button onClick={() => setShowReviewForm(true)}>
+                    <Star className="w-4 h-4 mr-2" />
+                    Laisser un avis
+                  </Button>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Partagez votre expérience avec cette {listingTitle ? `"${listingTitle}"` : 'annonce'}
+                  </p>
+                </div>
               ) : (
                 <div className="space-y-4">
                   <h4 className="font-medium">Votre avis</h4>
