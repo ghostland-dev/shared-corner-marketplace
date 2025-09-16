@@ -12,7 +12,8 @@ interface ListingCardProps {
   title: string;
   price: number;
   priceUnit: string;
-  imageUrl: string;
+  imageUrl?: string;
+  imageUrls?: string[];
   location: string;
   category: string;
   rating: number;
@@ -27,6 +28,7 @@ const ListingCard = ({
   price,
   priceUnit,
   imageUrl,
+  imageUrls,
   location,
   category,
   rating,
@@ -34,18 +36,29 @@ const ListingCard = ({
   views,
   className = ''
 }: ListingCardProps) => {
+  const displayImage = imageUrls?.[0] || imageUrl || '/placeholder.svg';
+  const hasMultipleImages = imageUrls && imageUrls.length > 1;
   return (
     <ErrorBoundary>
       <Card className={`overflow-hidden hover:shadow-lg transition-all duration-300 group ${className}`}>
         <div className="relative">
           <Link to={`/annonces/${id}`}>
             <img 
-              src={imageUrl} 
+              src={displayImage} 
               alt={title}
               className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
               loading="lazy"
             />
           </Link>
+          
+          {/* Indicateur de photos multiples */}
+          {hasMultipleImages && (
+            <div className="absolute bottom-3 right-3">
+              <Badge variant="secondary" className="bg-black/70 text-white border-none text-xs">
+                +{imageUrls!.length - 1} photos
+              </Badge>
+            </div>
+          )}
           
           {/* Prix badge */}
           <div className="absolute top-3 left-3">

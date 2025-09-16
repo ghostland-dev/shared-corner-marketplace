@@ -150,13 +150,13 @@ const SearchResults = () => {
                     <ListingCard
                       id={listing.id}
                       title={listing.title}
-                  price={listing.price}
-                  priceUnit={listing.price_unit}
-                  imageUrl={listing.image_urls?.[0] || '/placeholder.svg'}
-                  location={listing.location}
-                  category={listing.category_id}
-                  rating={4.5}
-                  distance={2}
+                      price={listing.price}
+                      priceUnit={listing.price_unit}
+                      imageUrls={listing.image_urls}
+                      location={listing.location}
+                      category={listing.category_id}
+                      rating={4.5}
+                      distance={2}
                     />
                   </div>
                 ))}

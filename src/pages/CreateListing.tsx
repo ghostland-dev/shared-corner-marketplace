@@ -15,6 +15,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
+import { useFileUpload } from '@/hooks/useFileUpload';
+import { useCreateListing } from '@/hooks/useCreateListing';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { categories } from '@/data/categories';
@@ -47,6 +49,9 @@ const CreateListing = () => {
   const navigate = useNavigate();
   const [images, setImages] = useState<string[]>([]);
   const [features, setFeatures] = useState<string[]>(["", "", ""]);
+  const [uploading, setUploading] = useState(false);
+  const { uploadListingImage } = useFileUpload();
+  const { createListing, loading } = useCreateListing();
 
   // Initialiser le formulaire
   const form = useForm<FormData>({
@@ -72,19 +77,59 @@ const CreateListing = () => {
     },
   });
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
-    if (!files) return;
+    if (!files || files.length === 0) return;
 
-    Array.from(files).forEach(file => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        if (e.target?.result) {
-          setImages(prev => [...prev, e.target!.result as string]);
+    if (images.length + files.length > 8) {
+      toast({
+        title: "Limite d'images atteinte",
+        description: "Vous ne pouvez ajouter que 8 images maximum",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setUploading(true);
+    const uploadedUrls: string[] = [];
+
+    try {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const { url, error } = await uploadListingImage(file);
+        
+        if (error) {
+          console.error('Error uploading image:', error);
+          toast({
+            title: "Erreur d'upload",
+            description: `Impossible d'uploader ${file.name}`,
+            variant: "destructive",
+          });
+          continue;
         }
-      };
-      reader.readAsDataURL(file);
-    });
+
+        if (url) {
+          uploadedUrls.push(url);
+        }
+      }
+
+      if (uploadedUrls.length > 0) {
+        setImages(prev => [...prev, ...uploadedUrls]);
+        toast({
+          title: "Images uploadées",
+          description: `${uploadedUrls.length} image(s) ajoutée(s) avec succès`,
+        });
+      }
+    } catch (error) {
+      console.error('Error in handleImageUpload:', error);
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de l'upload des images",
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
+    }
   };
 
   const removeImage = (index: number) => {
@@ -105,22 +150,30 @@ const CreateListing = () => {
     setFeatures(newFeatures);
   };
 
-  const onSubmit = (data: FormData) => {
-    // Ajouter les images et les caractéristiques non vides
-    data.images = images;
-    data.features = features.filter(f => f.trim() !== "");
+  const onSubmit = async (data: FormData) => {
+    if (images.length === 0) {
+      toast({
+        title: "Images requises",
+        description: "Veuillez ajouter au moins une image à votre annonce",
+        variant: "destructive",
+      });
+      return;
+    }
 
-    console.log("Données soumises:", data);
-    
-    toast({
-      title: "Annonce créée avec succès!",
-      description: "Votre annonce a été publiée et est maintenant visible par les utilisateurs.",
-    });
+    // Préparer les données pour l'API Supabase
+    const listingData = {
+      title: data.title,
+      description: data.description,
+      price: data.price,
+      price_unit: data.priceUnit,
+      location: data.location,
+      category_id: data.categoryId,
+      image_urls: images,
+      features: features.filter(f => f.trim() !== ""),
+      is_available: true,
+    };
 
-    // Rediriger vers la page d'accueil après la création
-    setTimeout(() => {
-      navigate("/");
-    }, 2000);
+    await createListing(listingData);
   };
 
   return (
@@ -380,21 +433,36 @@ const CreateListing = () => {
                         </div>
                       ))}
                       
-                      <label className="aspect-square border-2 border-dashed rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition">
-                        <Upload className="h-8 w-8 mb-2 text-gray-400" />
-                        <span className="text-sm text-gray-500">Ajouter une photo</span>
+                      <label 
+                        className={`aspect-square border-2 border-dashed rounded-lg flex flex-col items-center justify-center cursor-pointer transition ${
+                          uploading ? 'bg-muted cursor-not-allowed' : 'hover:bg-muted/50'
+                        } ${images.length >= 8 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      >
+                        <Upload className={`h-8 w-8 mb-2 ${uploading ? 'animate-pulse' : ''} text-muted-foreground`} />
+                        <span className="text-sm text-muted-foreground text-center px-2">
+                          {uploading ? 'Upload...' : images.length >= 8 ? 'Max 8 photos' : 'Ajouter une photo'}
+                        </span>
                         <input 
                           type="file" 
-                          accept="image/*" 
+                          accept="image/*,image/heic,image/heif" 
+                          multiple
                           onChange={handleImageUpload}
                           className="hidden" 
+                          disabled={uploading || images.length >= 8}
                         />
                       </label>
                     </div>
                     
-                    <p className="text-sm text-gray-500">
-                      Ajoutez jusqu'à 8 photos. La première sera l'image principale de votre annonce.
-                    </p>
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                      <p className="text-sm text-muted-foreground">
+                        Ajoutez jusqu'à 8 photos. La première sera l'image principale.
+                      </p>
+                      {images.length > 0 && (
+                        <span className="text-sm font-medium">
+                          {images.length}/8 photos
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -433,7 +501,13 @@ const CreateListing = () => {
               
               <div className="flex justify-end gap-4">
                 <Button type="button" variant="outline">Enregistrer en brouillon</Button>
-                <Button type="submit" className="kiwiiz-btn-primary">Publier l'annonce</Button>
+                <Button 
+                  type="submit" 
+                  className="kiwiiz-btn-primary" 
+                  disabled={loading || uploading}
+                >
+                  {loading ? 'Publication...' : 'Publier l\'annonce'}
+                </Button>
               </div>
             </form>
           </Form>

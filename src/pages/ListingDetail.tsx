@@ -17,6 +17,7 @@ import { ContactOwnerButton } from '@/components/ContactOwnerButton';
 import { FavoriteButton } from '@/components/FavoriteButton';
 import { ReservationForm } from '@/components/ReservationForm';
 import { ReviewsSection } from '@/components/ReviewsSection';
+import { ImageCarousel } from '@/components/ImageCarousel';
 import { useListingDetail } from '@/hooks/listing/useListingDetail';
 import { Listing } from '@/types/supabase';
 import { categories } from '@/data/categories';
@@ -135,17 +136,50 @@ const ListingDetail = () => {
       <Navbar />
       
       <main className="flex-grow">
-        {/* Images principales */}
-        <div className="relative h-[500px] overflow-hidden">
-          <img 
-            src={listing.image_urls?.[0] || '/placeholder.svg'} 
-            alt={listing.title} 
-            className="w-full h-full object-cover"
+        {/* Navigation et actions */}
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate('/')}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <ChevronLeft className="h-4 w-4 mr-1" />
+              Retour aux annonces
+            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handleShare}
+                aria-label="Partager"
+              >
+                <Share2 className="h-4 w-4" />
+              </Button>
+              <FavoriteButton 
+                listingId={listing.id}
+                variant="outline"
+                size="icon"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Galerie d'images */}
+        <div className="container mx-auto px-4">
+          <ImageCarousel 
+            images={listing.image_urls || []}
+            title={listing.title}
+            className="max-w-4xl mx-auto"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-          <div className="absolute bottom-6 left-6 right-6">
-            <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">{listing.title}</h1>
-            <div className="flex items-center text-white gap-4">
+        </div>
+
+        {/* En-tête de l'annonce */}
+        <div className="container mx-auto px-4 py-6">
+          <div className="max-w-4xl mx-auto">
+            <h1 className="text-3xl md:text-4xl font-bold mb-3">{listing.title}</h1>
+            <div className="flex flex-wrap items-center gap-4 text-muted-foreground">
               <div className="flex items-center">
                 <MapPin className="h-4 w-4 mr-1" />
                 <span>{listing.location}</span>
@@ -154,37 +188,11 @@ const ListingDetail = () => {
                 <Eye className="h-4 w-4 mr-1" />
                 <span>{listing.views || 0} vues</span>
               </div>
+              <div className="flex items-center">
+                <Calendar className="h-4 w-4 mr-1" />
+                <span>Publié le {format(new Date(listing.created_at), 'dd MMM yyyy', { locale: fr })}</span>
+              </div>
             </div>
-          </div>
-          <div className="absolute top-4 left-4">
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => navigate('/')}
-              className="bg-white/80 hover:bg-white text-gray-800"
-            >
-              <ChevronLeft className="h-4 w-4 mr-1" />
-              Retour
-            </Button>
-          </div>
-          <div className="absolute top-4 right-4 flex gap-2">
-            <Button
-              variant="secondary"
-              size="icon"
-              onClick={handleShare}
-              className="bg-white/80 hover:bg-white text-gray-800"
-              aria-label="Partager"
-            >
-              <Share2 className="h-5 w-5" />
-            </Button>
-            <Button
-              variant="secondary"
-              size="icon"
-              className="bg-white/80 hover:bg-white text-gray-800"
-              aria-label="Ajouter aux favoris"
-            >
-              <Heart className="h-5 w-5" />
-            </Button>
           </div>
         </div>
         
@@ -234,23 +242,6 @@ const ListingDetail = () => {
                 </div>
               )}
 
-              {/* Images supplémentaires */}
-              {listing.image_urls && listing.image_urls.length > 1 && (
-                <div>
-                  <h2 className="text-xl font-semibold mb-4">Photos</h2>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {listing.image_urls.slice(1).map((url, index) => (
-                      <div key={index} className="aspect-square rounded-lg overflow-hidden">
-                        <img 
-                          src={url} 
-                          alt={`${listing.title} - Photo ${index + 2}`}
-                          className="w-full h-full object-cover hover:scale-105 transition-transform"
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
 
               {/* Informations sur le propriétaire */}
               <div>
