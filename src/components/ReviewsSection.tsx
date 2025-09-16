@@ -196,7 +196,7 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({ listingId, owner
               {renderStars(getAverageRating(reviews))}
               <span className="text-lg font-semibold">{getAverageRating(reviews).toFixed(1)}</span>
             </div>
-            <Badge variant="secondary">
+            <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">
               {reviews.length} avis
             </Badge>
           </div>
