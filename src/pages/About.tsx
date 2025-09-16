@@ -1,257 +1,158 @@
 import React from 'react';
-import { Shield, Users, Zap, Award, Heart, Lightbulb, Target, Globe } from 'lucide-react';
+import { ArrowLeft, Users, Shield, Zap, Heart, Award, Globe } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { MainLayout } from '@/components/layout/MainLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
 
-const About = () => {
-  const values = [
-    {
-      icon: Shield,
-      title: "Sécurité",
-      description: "Transactions sécurisées et vérification des utilisateurs pour votre tranquillité d'esprit."
-    },
-    {
-      icon: Users,
-      title: "Communauté",
-      description: "Une communauté bienveillante de particuliers qui s'entraident au quotidien."
-    },
-    {
-      icon: Zap,
-      title: "Simplicité",
-      description: "Une plateforme intuitive qui rend la location entre particuliers accessible à tous."
-    },
-    {
-      icon: Award,
-      title: "Qualité",
-      description: "Des annonces vérifiées et un système d'évaluation pour garantir la qualité."
-    }
-  ];
-
-  const stats = [
-    { number: "50,000+", label: "Utilisateurs actifs" },
-    { number: "25,000+", label: "Annonces publiées" },
-    { number: "100,000+", label: "Locations réussies" },
-    { number: "4.8/5", label: "Note moyenne" }
-  ];
-
-  const team = [
-    {
-      name: "Marie Dubois",
-      role: "CEO & Fondatrice",
-      description: "Passionnée par l'économie collaborative et l'innovation technologique.",
-      avatar: "/placeholder.svg"
-    },
-    {
-      name: "Thomas Martin",
-      role: "CTO",
-      description: "Expert en développement web et sécurité des données.",
-      avatar: "/placeholder.svg"
-    },
-    {
-      name: "Sophie Laurent",
-      role: "Head of Community",
-      description: "Dédiée à l'expérience utilisateur et au développement communautaire.",
-      avatar: "/placeholder.svg"
-    }
-  ];
-
+export default function About() {
   return (
-    <div className="flex flex-col min-h-screen">
-      <Navbar />
-      
-      <main className="flex-grow">
-        {/* Hero Section */}
-        <section className="bg-gradient-to-br from-primary/10 via-background to-primary/5 py-16">
-          <div className="container mx-auto px-4">
-            <div className="max-w-4xl mx-auto text-center">
-              <Badge className="mb-4" variant="outline">
-                <Heart className="w-4 h-4 mr-2" />
-                À propos de Kiwiiz
-              </Badge>
-              <h1 className="text-4xl md:text-6xl font-bold mb-6">
-                L'économie collaborative 
-                <span className="text-primary"> réinventée</span>
-              </h1>
-              <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
-                Kiwiiz connecte les particuliers pour partager, louer et échanger leurs biens. 
-                Nous croyons en un monde plus durable et solidaire où chacun peut tirer parti 
-                de ses ressources inutilisées.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button size="lg" onClick={() => window.location.href = '/auth'}>
-                  Rejoindre la communauté
-                </Button>
-                <Button size="lg" variant="outline" onClick={() => window.location.href = '/comment-ca-marche'}>
-                  Comment ça marche
-                </Button>
-              </div>
-            </div>
+    <MainLayout>
+      <div className="container mx-auto px-4 py-8 max-w-6xl">
+        <div className="mb-8">
+          <Link to="/" className="inline-flex items-center text-muted-foreground hover:text-foreground mb-4">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Retour à l'accueil
+          </Link>
+          <div className="text-center">
+            <h1 className="text-4xl font-bold mb-4">À propos de Kiwiiz</h1>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              La plateforme qui révolutionne la location d'objets entre particuliers
+            </p>
           </div>
-        </section>
+        </div>
 
-        {/* Stats Section */}
-        <section className="py-16 bg-muted/30">
-          <div className="container mx-auto px-4">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-              {stats.map((stat, index) => (
-                <div key={index} className="text-center">
-                  <div className="text-3xl md:text-4xl font-bold text-primary mb-2">
-                    {stat.number}
-                  </div>
-                  <div className="text-muted-foreground">{stat.label}</div>
+        <div className="grid gap-8">
+          {/* Mission */}
+          <Card className="text-center">
+            <CardHeader>
+              <CardTitle className="flex items-center justify-center gap-2 text-2xl">
+                <Heart className="h-6 w-6 text-primary" />
+                Notre Mission
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="prose prose-neutral dark:prose-invert max-w-none">
+              <p className="text-lg">
+                Kiwiiz démocratise l'accès aux objets du quotidien en créant une communauté 
+                de partage basée sur la confiance, la simplicité et la durabilité.
+              </p>
+              <p>
+                Nous croyons qu'il est possible de consommer mieux en utilisant les ressources 
+                existantes plutôt que d'acheter systématiquement du neuf.
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Valeurs */}
+          <div className="grid md:grid-cols-3 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Shield className="h-5 w-5 text-primary" />
+                  Confiance
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p>
+                  Système de vérification d'identité, évaluations mutuelles et assurance 
+                  pour garantir des échanges sécurisés.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Zap className="h-5 w-5 text-primary" />
+                  Simplicité
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p>
+                  Interface intuitive, réservation en quelques clics et paiement sécurisé 
+                  pour une expérience utilisateur optimale.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Globe className="h-5 w-5 text-primary" />
+                  Durabilité
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p>
+                  Promotion de l'économie circulaire et réduction de l'empreinte carbone 
+                  grâce au partage d'objets.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Statistiques */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-2xl">
+                <Award className="h-6 w-6 text-primary" />
+                Kiwiiz en Chiffres
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+                <div>
+                  <div className="text-3xl font-bold text-primary">1K+</div>
+                  <div className="text-muted-foreground">Utilisateurs actifs</div>
                 </div>
-              ))}
-            </div>
-          </div>
-        </section>
+                <div>
+                  <div className="text-3xl font-bold text-primary">500+</div>
+                  <div className="text-muted-foreground">Objets disponibles</div>
+                </div>
+                <div>
+                  <div className="text-3xl font-bold text-primary">200+</div>
+                  <div className="text-muted-foreground">Locations réalisées</div>
+                </div>
+                <div>
+                  <div className="text-3xl font-bold text-primary">4.8/5</div>
+                  <div className="text-muted-foreground">Note moyenne</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-        {/* Mission Section */}
-        <section className="py-16">
-          <div className="container mx-auto px-4">
-            <div className="max-w-4xl mx-auto">
-              <div className="text-center mb-12">
-                <h2 className="text-3xl md:text-4xl font-bold mb-4">Notre mission</h2>
-                <p className="text-xl text-muted-foreground">
-                  Transformer la façon dont les gens partagent et utilisent leurs ressources
+          {/* Contact */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-2xl">Nous Contacter</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <h4 className="font-semibold mb-2">Adresse</h4>
+                  <p className="text-muted-foreground">
+                    123 Avenue des Champs-Élysées<br />
+                    75008 Paris, France
+                  </p>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-2">Contact</h4>
+                  <p className="text-muted-foreground">
+                    Email : <a href="mailto:contact@kiwiiz.com" className="text-primary hover:underline">contact@kiwiiz.com</a><br />
+                    Téléphone : +33 1 23 45 67 89
+                  </p>
+                </div>
+              </div>
+              <div className="mt-6 pt-6 border-t">
+                <p className="text-center text-muted-foreground">
+                  Des questions ? Envie de rejoindre l'aventure ? 
+                  <Link to="/contact" className="text-primary hover:underline ml-1">Contactez-nous !</Link>
                 </p>
               </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-                <Card className="border-0 shadow-lg">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Target className="w-6 h-6 text-primary" />
-                      Pourquoi Kiwiiz ?
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground leading-relaxed">
-                      Nous avons créé Kiwiiz parce que nous croyons que chacun possède des objets 
-                      qui pourraient être utiles à d'autres. Plutôt que de laisser dormir ces 
-                      ressources, pourquoi ne pas les partager et créer des liens au sein de sa communauté ?
-                    </p>
-                  </CardContent>
-                </Card>
-
-                <Card className="border-0 shadow-lg">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Globe className="w-6 h-6 text-primary" />
-                      Impact positif
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground leading-relaxed">
-                      En facilitant le partage entre particuliers, nous contribuons à réduire 
-                      la surconsommation, à créer du lien social et à permettre à chacun de 
-                      générer des revenus complémentaires tout en rendant service.
-                    </p>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Values Section */}
-        <section className="py-16 bg-muted/30">
-          <div className="container mx-auto px-4">
-            <div className="max-w-6xl mx-auto">
-              <div className="text-center mb-12">
-                <h2 className="text-3xl md:text-4xl font-bold mb-4">Nos valeurs</h2>
-                <p className="text-xl text-muted-foreground">
-                  Les principes qui guident chacune de nos décisions
-                </p>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {values.map((value, index) => (
-                  <Card key={index} className="text-center border-0 shadow-lg hover:shadow-xl transition-shadow">
-                    <CardHeader>
-                      <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <value.icon className="w-8 h-8 text-primary" />
-                      </div>
-                      <CardTitle className="text-lg">{value.title}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-muted-foreground text-sm leading-relaxed">
-                        {value.description}
-                      </p>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Team Section */}
-        <section className="py-16">
-          <div className="container mx-auto px-4">
-            <div className="max-w-6xl mx-auto">
-              <div className="text-center mb-12">
-                <h2 className="text-3xl md:text-4xl font-bold mb-4">Notre équipe</h2>
-                <p className="text-xl text-muted-foreground">
-                  Des passionnés dédiés à votre expérience
-                </p>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {team.map((member, index) => (
-                  <Card key={index} className="text-center border-0 shadow-lg">
-                    <CardHeader>
-                      <div className="w-24 h-24 bg-gray-200 rounded-full mx-auto mb-4">
-                        <img
-                          src={member.avatar}
-                          alt={member.name}
-                          className="w-full h-full rounded-full object-cover"
-                        />
-                      </div>
-                      <CardTitle className="text-lg">{member.name}</CardTitle>
-                      <p className="text-primary font-medium">{member.role}</p>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-muted-foreground text-sm leading-relaxed">
-                        {member.description}
-                      </p>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* CTA Section */}
-        <section className="py-16 bg-primary text-primary-foreground">
-          <div className="container mx-auto px-4">
-            <div className="max-w-4xl mx-auto text-center">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                Prêt à rejoindre l'aventure ?
-              </h2>
-              <p className="text-xl mb-8 opacity-90">
-                Rejoignez des milliers d'utilisateurs qui font confiance à Kiwiiz 
-                pour leurs locations entre particuliers.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button size="lg" variant="secondary" onClick={() => window.location.href = '/auth'}>
-                  Créer mon compte
-                </Button>
-                <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-primary" onClick={() => window.location.href = '/contact'}>
-                  Nous contacter
-                </Button>
-              </div>
-            </div>
-          </div>
-        </section>
-      </main>
-      
-      <Footer />
-    </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </MainLayout>
   );
-};
-
-export default About;
+}
