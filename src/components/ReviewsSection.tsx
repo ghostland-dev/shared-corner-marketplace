@@ -88,8 +88,8 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({ listingId, owner
             key={star}
             className={`${starSize} cursor-pointer transition-colors ${
               star <= rating 
-                ? 'fill-yellow-400 text-yellow-400' 
-                : 'text-gray-300 hover:text-yellow-400'
+                ? 'fill-primary text-primary' 
+                : 'text-muted-foreground hover:text-primary'
             }`}
             onClick={interactive ? () => setNewRating(star) : undefined}
           />
@@ -125,14 +125,14 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({ listingId, owner
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
-            <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+            <Star className="h-5 w-5 fill-primary text-primary" />
             Avis ({reviews.length})
           </CardTitle>
           
           {canAddReview && (
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" className="border-primary text-primary hover:bg-primary hover:text-primary-foreground">
                   <MessageCircle className="h-4 w-4 mr-2" />
                   Laisser un avis
                 </Button>
@@ -180,6 +180,7 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({ listingId, owner
                   <Button
                     onClick={handleSubmitReview}
                     disabled={submitting || newComment.trim().length < 10}
+                    className="bg-primary text-primary-foreground hover:bg-primary/90"
                   >
                     {submitting ? 'Publication...' : 'Publier'}
                   </Button>
@@ -192,8 +193,8 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({ listingId, owner
         {reviews.length > 0 && (
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
-              {renderStars(4)}
-              <span className="text-lg font-semibold">4.5</span>
+              {renderStars(getAverageRating(reviews))}
+              <span className="text-lg font-semibold">{getAverageRating(reviews).toFixed(1)}</span>
             </div>
             <Badge variant="secondary">
               {reviews.length} avis
@@ -205,7 +206,7 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({ listingId, owner
       <CardContent>
         {reviews.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
-            <Star className="h-12 w-12 mx-auto mb-3 opacity-50" />
+            <Star className="h-12 w-12 mx-auto mb-3 opacity-50 text-primary" />
             <p>Aucun avis pour le moment</p>
             {canAddReview && (
               <p className="text-sm mt-2">Soyez le premier à laisser un avis !</p>
