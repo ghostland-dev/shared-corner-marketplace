@@ -19,6 +19,9 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -71,13 +74,18 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Couleurs de marque harmonisées avec le système HSL
+				// Brand colors using semantic tokens
 				brand: {
 					light: 'hsl(var(--brand-light))',
 					dark: 'hsl(var(--brand-dark))',
 					'gradient-from': 'hsl(var(--brand-gradient-from))',
 					'gradient-to': 'hsl(var(--brand-gradient-to))'
-				}
+				},
+				// Legacy Kiwiiz colors - DEPRECATED but kept for compatibility
+				'kiwiiz-primary': 'hsl(var(--primary))',
+				'kiwiiz-secondary': 'hsl(var(--secondary))',
+				'kiwiiz-dark': 'hsl(var(--brand-dark))',
+				'kiwiiz-light': 'hsl(var(--brand-light))'
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

@@ -42,7 +42,7 @@ const Index = () => {
       
       <main className="flex-grow">
         {/* Hero section */}
-        <section className="bg-gradient-to-r from-kiwiiz-primary to-kiwiiz-secondary text-white py-20">
+        <section className="bg-gradient-to-r from-primary to-secondary text-primary-foreground py-20">
           <div className="kiwiiz-container">
             <div className="max-w-2xl mx-auto text-center">
               <h1 className="text-4xl md:text-5xl font-bold mb-6">
@@ -73,7 +73,7 @@ const Index = () => {
                   />
                   <MapPin className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
                 </div>
-                <Button type="submit" className="kiwiiz-btn-accent h-12 sm:w-auto w-full">
+                <Button type="submit" className="bg-primary text-primary-foreground hover:bg-primary/90 h-12 sm:w-auto w-full">
                   Rechercher
                 </Button>
               </form>
@@ -86,7 +86,7 @@ const Index = () => {
           <div className="kiwiiz-container">
             <div className="flex justify-between items-center mb-8">
               <h2 className="text-2xl font-bold">Catégories populaires</h2>
-              <Link to="/categories" className="text-kiwiiz-primary font-medium flex items-center hover:underline">
+              <Link to="/categories" className="text-primary font-medium flex items-center hover:underline">
                 Voir toutes <ArrowRight className="ml-1 h-4 w-4" />
               </Link>
             </div>
@@ -106,11 +106,11 @@ const Index = () => {
         </section>
         
         {/* Featured listings */}
-        <section className="py-10 bg-gray-50">
+        <section className="py-10 bg-muted/30">
           <div className="kiwiiz-container">
             <div className="flex justify-between items-center mb-8">
               <h2 className="text-2xl font-bold">Découvrez près de chez vous</h2>
-              <Link to="/recherche" className="text-kiwiiz-primary font-medium flex items-center hover:underline">
+              <Link to="/recherche" className="text-primary font-medium flex items-center hover:underline">
                 Voir tout <ArrowRight className="ml-1 h-4 w-4" />
               </Link>
             </div>
@@ -175,7 +175,7 @@ const Index = () => {
             
             <div className="text-center mt-12">
               <Link to="/recherche">
-                <Button className="kiwiiz-btn-primary">
+                <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
                   Commencer dès maintenant
                 </Button>
               </Link>
@@ -184,7 +184,7 @@ const Index = () => {
         </section>
         
         {/* CTA */}
-        <section className="bg-kiwiiz-primary text-white py-16">
+        <section className="bg-primary text-primary-foreground py-16">
           <div className="kiwiiz-container">
             <div className="max-w-3xl mx-auto text-center">
               <h2 className="text-3xl font-bold mb-6">Vous avez des objets qui prennent la poussière ?</h2>
@@ -192,12 +192,12 @@ const Index = () => {
                 Louez-les sur Kiwiiz et transformez-les en une source de revenu. C'est simple, rapide et sans engagement.
               </p>
               <div className="flex flex-col sm:flex-row justify-center gap-4">
-                <Button className="bg-white text-kiwiiz-primary hover:bg-gray-100">
+                <Button className="bg-background text-foreground hover:bg-background/90">
                   <Calendar className="mr-2 h-5 w-5" />
                   Créer un compte
                 </Button>
                 <Link to="/deposer-annonce">
-                  <Button className="bg-kiwiiz-dark text-white hover:bg-opacity-90">
+                  <Button className="bg-secondary text-secondary-foreground hover:bg-secondary/90">
                     Déposer une annonce
                   </Button>
                 </Link>

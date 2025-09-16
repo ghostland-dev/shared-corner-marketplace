@@ -29,7 +29,7 @@ export const useSearch = () => {
         .from('listings')
         .select(`
           *,
-          profiles:owner_id (
+          profiles!listings_owner_id_fkey (
             username,
             full_name,
             avatar_url

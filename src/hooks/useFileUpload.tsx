@@ -32,15 +32,19 @@ export const useFileUpload = () => {
       return { url: null, error: new Error('Fichier trop volumineux') };
     }
 
-    // Validate file type
-    const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    // Validate file type - more permissive for better UX
+    const validTypes = [
+      'image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif', 'image/bmp', 'image/svg+xml'
+    ];
     if (!validTypes.includes(file.type)) {
+      const error = new Error('Type de fichier non supporté');
+      console.error('File type validation failed:', { fileType: file.type, fileName: file.name });
       toast({
         title: "Type de fichier non supporté",
-        description: "Seuls les fichiers JPG, PNG, WEBP et GIF sont acceptés",
+        description: `Seuls les fichiers images sont acceptés (JPG, PNG, WEBP, GIF, BMP, SVG). Fichier reçu: ${file.type}`,
         variant: "destructive",
       });
-      return { url: null, error: new Error('Type de fichier non supporté') };
+      throw error;
     }
 
     setUploading(true);

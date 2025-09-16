@@ -1,4 +1,6 @@
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -118,6 +120,7 @@
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
   }
 }
 
@@ -160,4 +163,71 @@
   .status-completed {
     @apply bg-primary/10 text-primary border border-primary/20;
   }
+
+  /* Kiwiiz specific styles - DEPRECATED, use semantic tokens */
+  .kiwiiz-container {
+    @apply container mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .kiwiiz-card {
+    @apply bg-card text-card-foreground border border-border rounded-lg shadow-sm hover:shadow-md transition-all duration-200;
+  }
+
+  .kiwiiz-btn-primary {
+    @apply bg-primary text-primary-foreground hover:bg-primary/90 px-6 py-2 rounded-md font-medium transition-colors;
+  }
+
+  .kiwiiz-btn-secondary {
+    @apply bg-secondary text-secondary-foreground hover:bg-secondary/90 px-6 py-2 rounded-md font-medium transition-colors;
+  }
+
+  .kiwiiz-btn-accent {
+    @apply bg-accent text-accent-foreground hover:bg-accent/90 px-6 py-2 rounded-md font-medium transition-colors;
+  }
+
+  /* Legacy color variables - DEPRECATED, kept for compatibility */
+  .kiwiiz-primary {
+    color: hsl(var(--primary));
+  }
+
+  .kiwiiz-secondary {
+    color: hsl(var(--secondary));
+  }
+
+  .kiwiiz-dark {
+    color: hsl(var(--brand-dark));
+  }
+
+  .kiwiiz-light {
+    background-color: hsl(var(--brand-light));
+  }
+
+  .bg-kiwiiz-primary {
+    background-color: hsl(var(--primary));
+  }
+
+  .bg-kiwiiz-secondary {
+    background-color: hsl(var(--secondary));
+  }
+
+  .bg-kiwiiz-dark {
+    background-color: hsl(var(--brand-dark));
+  }
+
+  .bg-kiwiiz-light {
+    background-color: hsl(var(--brand-light));
+  }
+
+  .text-kiwiiz-primary {
+    color: hsl(var(--primary));
+  }
+
+  .text-kiwiiz-secondary {
+    color: hsl(var(--secondary));
+  }
+
+  .text-kiwiiz-dark {
+    color: hsl(var(--brand-dark));
+  }
+}
 }

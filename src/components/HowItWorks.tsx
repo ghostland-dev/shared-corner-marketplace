@@ -22,7 +22,7 @@ const steps = [
 
 const HowItWorks = () => {
   return (
-    <section className="bg-kiwiiz-light py-16">
+    <section className="bg-muted/30 py-16">
       <div className="kiwiiz-container">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold mb-2">Comment ça marche ?</h2>
@@ -35,7 +35,7 @@ const HowItWorks = () => {
           {steps.map((step, index) => (
             <div key={index} className="kiwiiz-card p-6 text-center">
               <div className="flex justify-center mb-4">
-                <div className="w-12 h-12 rounded-full bg-kiwiiz-primary flex items-center justify-center text-white font-bold">
+                <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold">
                   {index + 1}
                 </div>
               </div>
@@ -49,15 +49,15 @@ const HowItWorks = () => {
           <h3 className="text-2xl font-bold mb-6">Les avantages de Kiwiiz</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mx-auto">
             <div className="flex items-start">
-              <CheckCircle className="text-kiwiiz-primary h-6 w-6 mr-2 flex-shrink-0" />
+              <CheckCircle className="text-primary h-6 w-6 mr-2 flex-shrink-0" />
               <p className="text-left">Location sécurisée avec assurance incluse</p>
             </div>
             <div className="flex items-start">
-              <CheckCircle className="text-kiwiiz-primary h-6 w-6 mr-2 flex-shrink-0" />
+              <CheckCircle className="text-primary h-6 w-6 mr-2 flex-shrink-0" />
               <p className="text-left">Économisez de l'argent en louant au lieu d'acheter</p>
             </div>
             <div className="flex items-start">
-              <CheckCircle className="text-kiwiiz-primary h-6 w-6 mr-2 flex-shrink-0" />
+              <CheckCircle className="text-primary h-6 w-6 mr-2 flex-shrink-0" />
               <p className="text-left">Rencontrez des personnes de votre quartier</p>
             </div>
           </div>
