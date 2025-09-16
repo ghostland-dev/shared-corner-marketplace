@@ -45,6 +45,18 @@ export const useFavorites = () => {
       return;
     }
 
+    // Validate UUID format
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(listingId)) {
+      console.error('Invalid UUID format for listing:', listingId);
+      toast({
+        title: "Erreur",
+        description: "ID d'annonce invalide",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       const { error } = await supabase
@@ -57,6 +69,10 @@ export const useFavorites = () => {
       if (error) throw error;
 
       setFavorites(prev => [...prev, listingId]);
+      toast({
+        title: "Ajouté aux favoris",
+        description: "L'annonce a été ajoutée à vos favoris",
+      });
     } catch (error) {
       console.error('Error adding favorite:', error);
       toast({
@@ -73,6 +89,13 @@ export const useFavorites = () => {
   const removeFavorite = async (listingId: string) => {
     if (!user) return;
 
+    // Validate UUID format
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(listingId)) {
+      console.error('Invalid UUID format for listing:', listingId);
+      return;
+    }
+
     setLoading(true);
     try {
       const { error } = await supabase
@@ -84,6 +107,10 @@ export const useFavorites = () => {
       if (error) throw error;
 
       setFavorites(prev => prev.filter(id => id !== listingId));
+      toast({
+        title: "Retiré des favoris",
+        description: "L'annonce a été retirée de vos favoris",
+      });
     } catch (error) {
       console.error('Error removing favorite:', error);
       toast({

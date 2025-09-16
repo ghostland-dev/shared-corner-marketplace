@@ -17,7 +17,7 @@ import { ContactOwnerButton } from '@/components/ContactOwnerButton';
 import { FavoriteButton } from '@/components/FavoriteButton';
 import { ReservationForm } from '@/components/ReservationForm';
 import { ReviewsSection } from '@/components/ReviewsSection';
-import { ImageCarousel } from '@/components/ImageCarousel';
+import ImageCarousel from '@/components/ImageCarousel';
 import { useListingDetail } from '@/hooks/listing/useListingDetail';
 import { Listing } from '@/types/supabase';
 import { categories } from '@/data/categories';
@@ -168,11 +168,12 @@ const ListingDetail = () => {
 
         {/* Galerie d'images */}
         <div className="container mx-auto px-4">
-          <ImageCarousel 
-            images={listing.image_urls || []}
-            title={listing.title}
-            className="max-w-4xl mx-auto"
-          />
+          <div className="max-w-4xl mx-auto">
+            <ImageCarousel 
+              images={listing.image_urls || []}
+              title={listing.title}
+            />
+          </div>
         </div>
 
         {/* En-tête de l'annonce */}

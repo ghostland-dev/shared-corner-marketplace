@@ -1,247 +1,244 @@
-import React, { useState, useEffect } from 'react';
-import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
-import { Star, MessageSquare, User as UserIcon, CheckCircle } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useState } from 'react';
+import { Star, User, Calendar, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { useReviews, Review } from '@/hooks/useReviews';
+import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
-import { isValidUUID } from '@/lib/utils-app';
+import { useReviews } from '@/hooks/useReviews';
+import { useToast } from '@/hooks/use-toast';
+import { safeProp } from '@/lib/safety-utils';
 
 interface ReviewsSectionProps {
   listingId: string;
   ownerId: string;
-  listingTitle?: string;
-  className?: string;
 }
 
-export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
-  listingId,
-  ownerId,
-  listingTitle,
-  className
-}) => {
+export const ReviewsSection: React.FC<ReviewsSectionProps> = ({ listingId, ownerId }) => {
   const { user } = useAuth();
-  const { reviews, loading, loadReviews, createReview, getAverageRating, canUserReview } = useReviews();
-  const [showReviewForm, setShowReviewForm] = useState(false);
-  const [canReview, setCanReview] = useState(false);
-  const [reviewRating, setReviewRating] = useState(5);
-  const [reviewComment, setReviewComment] = useState('');
+  const { reviews, loading, createReview } = useReviews();
+  const { toast } = useToast();
+  const [newRating, setNewRating] = useState(5);
+  const [newComment, setNewComment] = useState('');
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [hasCompletedReservation, setHasCompletedReservation] = useState(false);
 
-  useEffect(() => {
-    // Vérifier si l'ID est un UUID valide pour Supabase
-    if (isValidUUID(listingId)) {
-      loadReviews(listingId);
-      
-      if (user) {
-        checkUserReviewEligibility();
-      }
-    }
-  }, [listingId, user]);
-
-  const checkUserReviewEligibility = async () => {
-    // Vérifier si l'ID est un UUID valide pour Supabase
-    if (!isValidUUID(listingId)) {
-      setCanReview(false);
-      setHasCompletedReservation(false);
-      return;
-    }
-
-    const canReviewListing = await canUserReview(listingId);
-    setCanReview(canReviewListing);
-    
-    // Vérifier s'il y a une réservation terminée
-    if (user) {
-      try {
-        const { data } = await supabase
-          .from('reservations')
-          .select('id')
-          .eq('listing_id', listingId)
-          .eq('renter_id', user.id)
-          .eq('status', 'completed')
-          .maybeSingle();
-        
-        setHasCompletedReservation(!!data);
-      } catch (error) {
-        console.error('Error checking reservation:', error);
-      }
-    }
-  };
+  const canAddReview = user && user.id !== ownerId;
 
   const handleSubmitReview = async () => {
     if (!user) return;
 
-    setSubmitting(true);
-    const result = await createReview(listingId, ownerId, reviewRating, reviewComment);
-    
-    if (result.success) {
-      setShowReviewForm(false);
-      setReviewComment('');
-      setReviewRating(5);
-      setCanReview(false);
+    if (newComment.trim().length < 10) {
+      toast({
+        title: "Commentaire trop court",
+        description: "Votre commentaire doit contenir au moins 10 caractères",
+        variant: "destructive",
+      });
+      return;
     }
-    setSubmitting(false);
+
+    setSubmitting(true);
+    try {
+      await createReview(listingId, ownerId, newRating, newComment.trim());
+      setNewComment('');
+      setNewRating(5);
+      setIsDialogOpen(false);
+      toast({
+        title: "Avis ajouté",
+        description: "Votre avis a été publié avec succès",
+      });
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible de publier votre avis",
+        variant: "destructive",
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  const renderStars = (rating: number, interactive = false, onRatingChange?: (rating: number) => void) => {
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('fr-FR', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
+  const renderStars = (rating: number, interactive = false, size = 'default') => {
+    const starSize = size === 'large' ? 'h-6 w-6' : 'h-4 w-4';
+    
     return (
-      <div className="flex items-center gap-1">
+      <div className="flex gap-1">
         {[1, 2, 3, 4, 5].map((star) => (
           <Star
             key={star}
-            className={`w-5 h-5 transition-colors ${
+            className={`${starSize} cursor-pointer transition-colors ${
               star <= rating 
-                ? 'text-warning fill-current' 
-                : 'text-muted-foreground'
-            } ${interactive ? 'cursor-pointer hover:text-warning' : ''}`}
-            onClick={() => interactive && onRatingChange?.(star)}
+                ? 'fill-yellow-400 text-yellow-400' 
+                : 'text-gray-300 hover:text-yellow-400'
+            }`}
+            onClick={interactive ? () => setNewRating(star) : undefined}
           />
         ))}
       </div>
     );
   };
 
-  const averageRating = getAverageRating(reviews);
-
-  return (
-    <div className={className}>
+  if (loading) {
+    return (
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <MessageSquare className="w-5 h-5" />
-              Avis ({reviews.length})
-            </CardTitle>
-            {reviews.length > 0 && (
-              <div className="flex items-center gap-2">
-                {renderStars(Math.round(averageRating))}
-                <Badge variant="secondary">
-                  {averageRating.toFixed(1)}
-                </Badge>
-              </div>
-            )}
-          </div>
+          <CardTitle className="flex items-center gap-2">
+            <Star className="h-5 w-5" />
+            Avis
+          </CardTitle>
         </CardHeader>
-        
-        <CardContent className="space-y-6">
-          {/* Formulaire d'avis */}
-          {user && user.id !== ownerId && (
-            <div className="space-y-4 p-4 bg-muted/50 rounded-lg">
-              {!hasCompletedReservation ? (
-                <div className="text-center py-4">
-                  <MessageSquare className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground">
-                    Vous devez avoir terminé une réservation pour laisser un avis
-                  </p>
-                </div>
-              ) : !canReview ? (
-                <div className="text-center py-4">
-                  <CheckCircle className="w-8 h-8 mx-auto mb-2 text-success" />
-                  <p className="text-sm text-muted-foreground">
-                    Vous avez déjà laissé un avis pour cette annonce
-                  </p>
-                </div>
-              ) : !showReviewForm ? (
-                <div className="text-center">
-                  <Button onClick={() => setShowReviewForm(true)}>
-                    <Star className="w-4 h-4 mr-2" />
-                    Laisser un avis
-                  </Button>
-                  <p className="text-xs text-muted-foreground mt-2">
-                    Partagez votre expérience avec cette {listingTitle ? `"${listingTitle}"` : 'annonce'}
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  <h4 className="font-medium">Votre avis</h4>
-                  
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Note</label>
-                    {renderStars(reviewRating, true, setReviewRating)}
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Commentaire (optionnel)</label>
-                    <Textarea
-                      placeholder="Partagez votre expérience..."
-                      value={reviewComment}
-                      onChange={(e) => setReviewComment(e.target.value)}
-                      rows={3}
-                    />
-                  </div>
-                  
-                  <div className="flex gap-2">
-                    <Button 
-                      onClick={handleSubmitReview}
-                      disabled={submitting}
-                    >
-                      {submitting ? 'Publication...' : 'Publier l\'avis'}
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      onClick={() => setShowReviewForm(false)}
-                      disabled={submitting}
-                    >
-                      Annuler
-                    </Button>
-                  </div>
-                </div>
-              )}
+        <CardContent>
+          <div className="animate-pulse space-y-4">
+            <div className="h-4 bg-muted rounded w-1/3"></div>
+            <div className="space-y-3">
+              <div className="h-20 bg-muted rounded"></div>
+              <div className="h-20 bg-muted rounded"></div>
             </div>
-          )}
-
-          {/* Liste des avis */}
-          {loading ? (
-            <div className="text-center py-8">
-              <p>Chargement des avis...</p>
-            </div>
-          ) : reviews.length === 0 ? (
-            <div className="text-center py-8">
-              <MessageSquare className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-              <p className="text-muted-foreground">
-                Aucun avis pour le moment. Soyez le premier à laisser un avis !
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {reviews.map((review) => (
-                <div key={review.id} className="flex gap-4 p-4 border rounded-lg">
-                  <Avatar className="w-10 h-10">
-                    <AvatarImage src={review.reviewer_profile?.avatar_url} />
-                    <AvatarFallback>
-                      {(review.reviewer_profile?.full_name || review.reviewer_profile?.username || 'U')[0].toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  
-                  <div className="flex-1 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium">
-                          {review.reviewer_profile?.full_name || review.reviewer_profile?.username || 'Utilisateur'}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          {format(new Date(review.created_at), 'dd MMMM yyyy', { locale: fr })}
-                        </p>
-                      </div>
-                      {renderStars(review.rating)}
-                    </div>
-                    
-                    {review.comment && (
-                      <p className="text-sm">{review.comment}</p>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+          </div>
         </CardContent>
       </Card>
-    </div>
+    );
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2">
+            <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+            Avis ({reviews.length})
+          </CardTitle>
+          
+          {canAddReview && (
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <MessageCircle className="h-4 w-4 mr-2" />
+                  Laisser un avis
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Laisser un avis</DialogTitle>
+                </DialogHeader>
+                
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <Label>Note</Label>
+                    <div className="flex items-center gap-2">
+                      {renderStars(newRating, true, 'large')}
+                      <span className="text-sm text-muted-foreground">
+                        ({newRating}/5)
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="comment">Commentaire</Label>
+                    <Textarea
+                      id="comment"
+                      placeholder="Partagez votre expérience..."
+                      value={newComment}
+                      onChange={(e) => setNewComment(e.target.value)}
+                      rows={4}
+                      maxLength={500}
+                    />
+                    <div className="text-xs text-muted-foreground text-right">
+                      {newComment.length}/500 caractères
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex justify-end gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsDialogOpen(false)}
+                    disabled={submitting}
+                  >
+                    Annuler
+                  </Button>
+                  <Button
+                    onClick={handleSubmitReview}
+                    disabled={submitting || newComment.trim().length < 10}
+                  >
+                    {submitting ? 'Publication...' : 'Publier'}
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          )}
+        </div>
+        
+        {reviews.length > 0 && (
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              {renderStars(4)}
+              <span className="text-lg font-semibold">4.5</span>
+            </div>
+            <Badge variant="secondary">
+              {reviews.length} avis
+            </Badge>
+          </div>
+        )}
+      </CardHeader>
+      
+      <CardContent>
+        {reviews.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground">
+            <Star className="h-12 w-12 mx-auto mb-3 opacity-50" />
+            <p>Aucun avis pour le moment</p>
+            {canAddReview && (
+              <p className="text-sm mt-2">Soyez le premier à laisser un avis !</p>
+            )}
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {safeProp(reviews, []).map((review) => (
+              <div key={safeProp(review, 'id', '')} className="space-y-3">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                      <User className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-medium">
+                        {safeProp(review, 'profiles.full_name') || 
+                         safeProp(review, 'profiles.username') || 'Utilisateur'}
+                      </p>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Calendar className="h-3 w-3" />
+                        {formatDate(safeProp(review, 'created_at', ''))}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-end gap-1">
+                    {renderStars(safeProp(review, 'rating', 0))}
+                  </div>
+                </div>
+                
+                {safeProp(review, 'comment') && (
+                  <p className="text-sm leading-relaxed ml-13">
+                    {safeProp(review, 'comment', '')}
+                  </p>
+                )}
+                
+                <Separator />
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 };

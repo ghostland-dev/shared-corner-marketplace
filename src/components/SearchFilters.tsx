@@ -1,126 +1,252 @@
-import React, { useState } from 'react';
-import { Search, Filter, ChevronDown, ChevronUp, X } from 'lucide-react';
+import React from 'react';
+import { Search, Filter, SlidersHorizontal, Map } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
-import { Card, CardContent } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-
-export interface FilterState {
-  query: string;
-  category: string;
-  location: string;
-  priceRange: [number, number];
-  priceUnit: string;
-  features: string[];
-  sortBy: 'price_asc' | 'price_desc' | 'date_desc' | 'popularity';
-}
+import { Separator } from '@/components/ui/separator';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { categories } from '@/data/categories';
 
 interface SearchFiltersProps {
-  onFiltersChange: (filters: FilterState) => void;
-  initialFilters?: Partial<FilterState>;
-  className?: string;
+  query: string;
+  onQueryChange: (query: string) => void;
+  location: string;
+  onLocationChange: (location: string) => void;
+  category: string;
+  onCategoryChange: (category: string) => void;
+  minPrice: number;
+  maxPrice: number;
+  onPriceChange: (min: number, max: number) => void;
+  priceRange: [number, number];
+  onSearch: () => void;
+  resultsCount: number;
+  loading?: boolean;
 }
 
-const defaultFilters: FilterState = {
-  query: '',
-  category: '',
-  location: '',
-  priceRange: [0, 1000],
-  priceUnit: 'jour',
-  features: [],
-  sortBy: 'date_desc'
-};
-
-const availableFeatures = [
-  'WiFi', 'Parking', 'Climatisation', 'Animaux acceptés',
-  'Équipement professionnel', 'Livraison possible'
-];
-
-const categories = [
-  { id: 'tools', name: 'Outils' },
-  { id: 'vehicles', name: 'Véhicules' },
-  { id: 'housing', name: 'Logement' },
-  { id: 'books', name: 'Livres' },
-  { id: 'items', name: 'Objets' },
-  { id: 'photo', name: 'Photo' }
-];
-
 export const SearchFilters: React.FC<SearchFiltersProps> = ({
-  onFiltersChange,
-  initialFilters = {},
-  className = ''
+  query,
+  onQueryChange,
+  location,
+  onLocationChange,
+  category,
+  onCategoryChange,
+  minPrice,
+  maxPrice,
+  onPriceChange,
+  priceRange,
+  onSearch,
+  resultsCount,
+  loading = false
 }) => {
-  const [filters, setFilters] = useState<FilterState>({
-    ...defaultFilters,
-    ...initialFilters
-  });
-  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
+  const [isFilterDialogOpen, setIsFilterDialogOpen] = React.useState(false);
+  const [tempPriceRange, setTempPriceRange] = React.useState<[number, number]>(priceRange);
 
-  const updateFilters = (newFilters: Partial<FilterState>) => {
-    const updatedFilters = { ...filters, ...newFilters };
-    setFilters(updatedFilters);
-    onFiltersChange(updatedFilters);
+  const handlePriceRangeChange = (values: number[]) => {
+    setTempPriceRange([values[0], values[1]]);
   };
 
-  return (
-    <Card className={className}>
-      <CardContent className="p-6">
-        <div className="space-y-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-            <Input
-              placeholder="Rechercher une annonce..."
-              value={filters.query}
-              onChange={(e) => updateFilters({ query: e.target.value })}
-              className="pl-10"
-            />
-          </div>
+  const applyFilters = () => {
+    onPriceChange(tempPriceRange[0], tempPriceRange[1]);
+    onSearch();
+    setIsFilterDialogOpen(false);
+  };
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Select
-              value={filters.category || "all"}
-              onValueChange={(value) => updateFilters({ category: value === "all" ? "" : value })}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Toutes les catégories" />
+  const resetFilters = () => {
+    onQueryChange('');
+    onLocationChange('');
+    onCategoryChange('');
+    onPriceChange(0, 1000);
+    setTempPriceRange([0, 1000]);
+  };
+
+  const hasActiveFilters = query || location || category || minPrice > 0 || maxPrice < 1000;
+
+  return (
+    <div className="space-y-4">
+      {/* Main Search Bar */}
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex flex-col md:flex-row gap-4">
+            {/* Search Input */}
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Que cherchez-vous ?"
+                value={query}
+                onChange={(e) => onQueryChange(e.target.value)}
+                className="pl-10"
+                onKeyPress={(e) => e.key === 'Enter' && onSearch()}
+              />
+            </div>
+
+            {/* Location Input */}
+            <div className="relative md:w-64">
+              <Map className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Où ?"
+                value={location}
+                onChange={(e) => onLocationChange(e.target.value)}
+                className="pl-10"
+                onKeyPress={(e) => e.key === 'Enter' && onSearch()}
+              />
+            </div>
+
+            {/* Category Select */}
+            <Select value={category} onValueChange={onCategoryChange}>
+              <SelectTrigger className="md:w-48">
+                <SelectValue placeholder="Catégorie" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Toutes les catégories</SelectItem>
-                {categories.map((category) => (
-                  <SelectItem key={category.id} value={category.id}>
-                    {category.name}
+                <SelectItem value="">Toutes les catégories</SelectItem>
+                {categories.map((cat) => (
+                  <SelectItem key={cat.id} value={cat.id}>
+                    {cat.name}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
 
-            <Input
-              placeholder="Ville, région..."
-              value={filters.location}
-              onChange={(e) => updateFilters({ location: e.target.value })}
-            />
+            {/* Filter Button */}
+            <Dialog open={isFilterDialogOpen} onOpenChange={setIsFilterDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="relative">
+                  <SlidersHorizontal className="h-4 w-4 mr-2" />
+                  Filtres
+                  {hasActiveFilters && (
+                    <Badge className="absolute -top-2 -right-2 h-5 w-5 p-0 text-xs">
+                      !
+                    </Badge>
+                  )}
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Filtres de recherche</DialogTitle>
+                </DialogHeader>
+                
+                <div className="space-y-6 py-4">
+                  {/* Price Range */}
+                  <div className="space-y-3">
+                    <Label className="text-sm font-medium">
+                      Prix par jour : {tempPriceRange[0]}€ - {tempPriceRange[1]}€
+                    </Label>
+                    <Slider
+                      value={tempPriceRange}
+                      onValueChange={handlePriceRangeChange}
+                      max={1000}
+                      min={0}
+                      step={10}
+                      className="w-full"
+                    />
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>0€</span>
+                      <span>1000€+</span>
+                    </div>
+                  </div>
 
-            <Select
-              value={filters.sortBy}
-              onValueChange={(value: FilterState['sortBy']) => updateFilters({ sortBy: value })}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="date_desc">Plus récent</SelectItem>
-                <SelectItem value="price_asc">Prix croissant</SelectItem>
-                <SelectItem value="price_desc">Prix décroissant</SelectItem>
-                <SelectItem value="popularity">Popularité</SelectItem>
-              </SelectContent>
-            </Select>
+                  <Separator />
+
+                  {/* Active Filters Summary */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Filtres actifs</Label>
+                    <div className="flex flex-wrap gap-2">
+                      {query && (
+                        <Badge variant="secondary">
+                          Recherche: "{query}"
+                        </Badge>
+                      )}
+                      {location && (
+                        <Badge variant="secondary">
+                          Lieu: {location}
+                        </Badge>
+                      )}
+                      {category && (
+                        <Badge variant="secondary">
+                          {categories.find(c => c.id === category)?.name}
+                        </Badge>
+                      )}
+                      {(minPrice > 0 || maxPrice < 1000) && (
+                        <Badge variant="secondary">
+                          Prix: {minPrice}€ - {maxPrice}€
+                        </Badge>
+                      )}
+                      {!hasActiveFilters && (
+                        <span className="text-sm text-muted-foreground">
+                          Aucun filtre actif
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-between gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={resetFilters}
+                    disabled={!hasActiveFilters}
+                  >
+                    Réinitialiser
+                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => setIsFilterDialogOpen(false)}
+                    >
+                      Annuler
+                    </Button>
+                    <Button onClick={applyFilters}>
+                      Appliquer
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+
+            {/* Search Button */}
+            <Button onClick={onSearch} disabled={loading} className="md:w-auto">
+              {loading ? (
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent mr-2" />
+              ) : (
+                <Search className="h-4 w-4 mr-2" />
+              )}
+              Rechercher
+            </Button>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Results Summary */}
+      <div className="flex items-center justify-between text-sm text-muted-foreground">
+        <div>
+          {loading ? (
+            <span>Recherche en cours...</span>
+          ) : (
+            <span>
+              {resultsCount > 0 
+                ? `${resultsCount} résultat${resultsCount > 1 ? 's' : ''} trouvé${resultsCount > 1 ? 's' : ''}`
+                : 'Aucun résultat trouvé'
+              }
+            </span>
+          )}
         </div>
-      </CardContent>
-    </Card>
+
+        {hasActiveFilters && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={resetFilters}
+            className="h-auto p-1 text-xs"
+          >
+            Effacer les filtres
+          </Button>
+        )}
+      </div>
+    </div>
   );
 };

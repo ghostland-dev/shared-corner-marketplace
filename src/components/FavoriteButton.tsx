@@ -35,26 +35,25 @@ export const FavoriteButton: React.FC<FavoriteButtonProps> = ({
       return;
     }
 
+    // Check if listing ID is valid UUID
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(listingId)) {
+      toast({
+        title: "Fonctionnalité non disponible", 
+        description: "Cette fonctionnalité n'est disponible que pour les vraies annonces",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       if (isFavorite(listingId)) {
         await removeFavorite(listingId);
-        toast({
-          title: "Retiré des favoris",
-          description: "L'annonce a été retirée de vos favoris",
-        });
       } else {
         await addFavorite(listingId);
-        toast({
-          title: "Ajouté aux favoris",
-          description: "L'annonce a été ajoutée à vos favoris",
-        });
       }
     } catch (error) {
-      toast({
-        title: "Erreur",
-        description: "Impossible de modifier les favoris",
-        variant: "destructive",
-      });
+      // Error handling is done in the hooks
     }
   };
 
