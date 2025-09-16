@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ErrorBoundary } from './ErrorBoundary';
 import { FavoriteButton } from './FavoriteButton';
+import { getValidImageUrl, safeNumber, safeString, formatPrice } from '@/lib/safety-utils';
 
 interface ListingCardProps {
   id: string;
@@ -36,8 +37,12 @@ const ListingCard = ({
   views,
   className = ''
 }: ListingCardProps) => {
-  const displayImage = imageUrls?.[0] || imageUrl || '/placeholder.svg';
-  const hasMultipleImages = imageUrls && imageUrls.length > 1;
+  // Sécurisation des données d'entrée
+  const safePriceValue = safeNumber(price);
+  const safePriceUnit = safeString(priceUnit, 'jour');
+  const safeTitle = safeString(title, 'Titre non disponible');
+  const displayImage = getValidImageUrl(imageUrls?.[0] || imageUrl);
+  const hasMultipleImages = Array.isArray(imageUrls) && imageUrls.length > 1;
   return (
     <ErrorBoundary>
       <Card className={`overflow-hidden hover:shadow-lg transition-all duration-300 group ${className}`}>
@@ -45,9 +50,12 @@ const ListingCard = ({
           <Link to={`/annonces/${id}`}>
             <img 
               src={displayImage} 
-              alt={title}
+              alt={safeTitle}
               className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
               loading="lazy"
+              onError={(e) => {
+                e.currentTarget.src = '/placeholder.svg';
+              }}
             />
           </Link>
           
@@ -55,7 +63,7 @@ const ListingCard = ({
           {hasMultipleImages && (
             <div className="absolute bottom-3 right-3">
               <Badge variant="secondary" className="bg-black/70 text-white border-none text-xs">
-                +{imageUrls!.length - 1} photos
+                +{(imageUrls?.length || 1) - 1} photos
               </Badge>
             </div>
           )}
@@ -63,7 +71,7 @@ const ListingCard = ({
           {/* Prix badge */}
           <div className="absolute top-3 left-3">
             <Badge className="bg-black/70 text-white border-none">
-              {price.toFixed(2)}€/{priceUnit}
+              {formatPrice(safePriceValue, safePriceUnit)}
             </Badge>
           </div>
           
@@ -88,7 +96,7 @@ const ListingCard = ({
         <CardContent className="p-4">
           <Link to={`/annonces/${id}`} className="block">
             <h3 className="font-semibold text-lg mb-2 line-clamp-1 group-hover:text-primary transition-colors">
-              {title}
+              {safeTitle}
             </h3>
           </Link>
           
@@ -105,13 +113,13 @@ const ListingCard = ({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1">
               <Star className="w-4 h-4 text-yellow-400 fill-current" />
-              <span className="text-sm font-medium">{rating.toFixed(1)}</span>
+              <span className="text-sm font-medium">{safeNumber(rating, 0).toFixed(1)}</span>
             </div>
             
             {views !== undefined && (
               <div className="flex items-center gap-1 text-sm text-muted-foreground">
                 <Eye className="w-4 h-4" />
-                <span>{views}</span>
+                <span>{safeNumber(views)}</span>
               </div>
             )}
           </div>

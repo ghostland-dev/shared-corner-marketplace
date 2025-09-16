@@ -10,6 +10,7 @@ import { SearchFilters } from '@/components/SearchFilters';
 import { Button } from '@/components/ui/button';
 import { useSearch } from '@/hooks/useSearch';
 import { useToast } from '@/hooks/use-toast';
+import { validateSearchFilters, handleError } from '@/lib/safety-utils';
 
 const SearchResults = () => {
   const locationRouter = useLocation();
@@ -40,16 +41,29 @@ const SearchResults = () => {
   }, [locationRouter.search]);
   
   const handleApplyFilters = (filters: any) => {
-    toast({
-      title: 'Filtres appliqués',
-      description: 'Vos résultats ont été mis à jour',
-    });
-    
-    search('', {
-      minPrice: filters.priceRange[0],
-      maxPrice: filters.priceRange[1],
-      category: filters.categories.length ? filters.categories[0] : undefined
-    });
+    try {
+      // Validation et normalisation sécurisée des filtres
+      const validatedFilters = validateSearchFilters(filters);
+
+      toast({
+        title: 'Filtres appliqués',
+        description: 'Vos résultats ont été mis à jour',
+      });
+      
+      search(validatedFilters.query || '', {
+        minPrice: validatedFilters.priceRange[0],
+        maxPrice: validatedFilters.priceRange[1],
+        category: validatedFilters.category || undefined,
+        location: validatedFilters.location || undefined
+      });
+    } catch (error) {
+      handleError(error, 'SearchResults.handleApplyFilters');
+      toast({
+        title: 'Erreur',
+        description: 'Impossible d\'appliquer les filtres',
+        variant: 'destructive'
+      });
+    }
   };
 
   return (
