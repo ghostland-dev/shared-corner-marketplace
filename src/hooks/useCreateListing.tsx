@@ -43,7 +43,7 @@ export const useCreateListing = () => {
         description: "Votre annonce a été publiée avec succès",
       });
 
-      navigate(`/annonces/${listing.id}`);
+      if (listing) { navigate(`/annonces/${listing.id}`); }
     } catch (error) {
       console.error('Error creating listing:', error);
       toast({

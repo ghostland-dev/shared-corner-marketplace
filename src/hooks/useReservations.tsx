@@ -120,8 +120,11 @@ export const useReservations = () => {
         return { success: false, error: fetchError };
       }
 
+      const listingOwnerId = Array.isArray((reservation as any).listings)
+        ? (reservation as any).listings[0]?.owner_id
+        : (reservation as any).listings?.owner_id;
       // Vérifier que l'utilisateur est soit le locataire, soit le propriétaire
-      const canModify = reservation.renter_id === user.id || reservation.listings.owner_id === user.id;
+      const canModify = reservation.renter_id === user.id || listingOwnerId === user.id;
       
       if (!canModify) {
         toast({
@@ -149,7 +152,7 @@ export const useReservations = () => {
 
       // Créer une notification pour l'autre partie
       const notificationRecipientId = reservation.renter_id === user.id 
-        ? reservation.listings.owner_id 
+        ? listingOwnerId 
         : reservation.renter_id;
 
       let notificationTitle, notificationMessage;

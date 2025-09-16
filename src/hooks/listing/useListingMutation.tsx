@@ -89,7 +89,7 @@ export const useListingMutation = () => {
         .eq('id', id)
         .single();
 
-      if (fetchError || listing.owner_id !== user.id) {
+      if (fetchError || !listing || listing.owner_id !== user.id) {
         toast({
           title: 'Non autorisé',
           description: "Vous n'êtes pas autorisé à modifier cette annonce.",
@@ -146,7 +146,7 @@ export const useListingMutation = () => {
         .eq('id', id)
         .single();
 
-      if (fetchError || listing.owner_id !== user.id) {
+      if (fetchError || !listing || listing.owner_id !== user.id) {
         toast({
           title: 'Non autorisé',
           description: "Vous n'êtes pas autorisé à supprimer cette annonce.",
