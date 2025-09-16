@@ -45,11 +45,10 @@ const SearchResults = () => {
       description: 'Vos résultats ont été mis à jour',
     });
     
-    search({
-      priceMin: filters.priceRange[0],
-      priceMax: filters.priceRange[1],
-      maxDistance: filters.distance,
-      categoryId: filters.categories.length ? filters.categories[0] : undefined
+    search('', {
+      minPrice: filters.priceRange[0],
+      maxPrice: filters.priceRange[1],
+      category: filters.categories.length ? filters.categories[0] : undefined
     });
   };
 
@@ -90,7 +89,7 @@ const SearchResults = () => {
           <div className="mb-6 flex justify-between items-center bg-white p-4 rounded-lg shadow-sm">
             <div>
               <p className="text-gray-600 font-medium">
-                {isLoading ? (
+                {loading ? (
                   <span className="flex items-center">
                     <Loader className="h-4 w-4 mr-2 animate-spin" />
                     Recherche en cours...
