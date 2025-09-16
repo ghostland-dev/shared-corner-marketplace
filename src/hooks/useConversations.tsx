@@ -56,9 +56,7 @@ export const useConversations = () => {
         .from('conversations')
         .select(`
           *,
-          listing:listings(id, title, image_urls),
-          participant_1_profile:profiles!conversations_participant_1_fkey(id, username, full_name, avatar_url),
-          participant_2_profile:profiles!conversations_participant_2_fkey(id, username, full_name, avatar_url)
+          listing:listings(id, title, image_urls)
         `)
         .or(`participant_1.eq.${user.id},participant_2.eq.${user.id}`)
         .order('last_message_at', { ascending: false });
@@ -67,11 +65,20 @@ export const useConversations = () => {
 
       const processedConversations = await Promise.all(
         (data || []).map(async (conv: any) => {
+          // Récupérer les profils des participants
+          const { data: profiles, error: profileError } = await supabase
+            .from('profiles')
+            .select('user_id, username, full_name, avatar_url')
+            .in('user_id', [conv.participant_1, conv.participant_2]);
+
+          if (profileError) {
+            console.error('Error loading profiles:', profileError);
+          }
+
           // Déterminer l'autre participant
           const isParticipant1 = conv.participant_1 === user.id;
-          const otherParticipant = isParticipant1 
-            ? conv.participant_2_profile 
-            : conv.participant_1_profile;
+          const otherParticipantId = isParticipant1 ? conv.participant_2 : conv.participant_1;
+          const otherParticipant = profiles?.find(p => p.user_id === otherParticipantId);
 
           // Compter les messages non lus
           const { count } = await supabase
@@ -83,7 +90,12 @@ export const useConversations = () => {
 
           return {
             ...conv,
-            other_participant: otherParticipant,
+            other_participant: otherParticipant ? {
+              id: otherParticipant.user_id,
+              username: otherParticipant.username,
+              full_name: otherParticipant.full_name,
+              avatar_url: otherParticipant.avatar_url
+            } : null,
             unread_count: count || 0
           };
         })
@@ -110,16 +122,30 @@ export const useConversations = () => {
     try {
       const { data, error } = await supabase
         .from('messages')
-        .select(`
-          *,
-          sender:profiles!messages_sender_id_fkey(id, username, full_name, avatar_url)
-        `)
+        .select('*')
         .eq('conversation_id', conversationId)
         .order('created_at', { ascending: true });
 
       if (error) throw error;
 
-      setMessages(data || []);
+      // Récupérer les profils des expéditeurs
+      const senderIds = [...new Set((data || []).map(m => m.sender_id))];
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('user_id, username, full_name, avatar_url')
+        .in('user_id', senderIds);
+
+      const messagesWithProfiles = (data || []).map(message => ({
+        ...message,
+        sender: profiles?.find(p => p.user_id === message.sender_id) ? {
+          id: profiles.find(p => p.user_id === message.sender_id)!.user_id,
+          username: profiles.find(p => p.user_id === message.sender_id)!.username,
+          full_name: profiles.find(p => p.user_id === message.sender_id)!.full_name,
+          avatar_url: profiles.find(p => p.user_id === message.sender_id)!.avatar_url
+        } : null
+      }));
+
+      setMessages(messagesWithProfiles);
 
       // Marquer les messages comme lus
       await supabase
@@ -218,16 +244,30 @@ export const useConversations = () => {
           sender_id: user.id,
           content: content.trim()
         })
-        .select(`
-          *,
-          sender:profiles!messages_sender_id_fkey(id, username, full_name, avatar_url)
-        `)
+        .select('*')
         .single();
 
       if (error) throw error;
 
+      // Récupérer le profil de l'expéditeur
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('user_id, username, full_name, avatar_url')
+        .eq('user_id', user.id)
+        .single();
+
+      const messageWithProfile = {
+        ...message,
+        sender: profile ? {
+          id: profile.user_id,
+          username: profile.username,
+          full_name: profile.full_name,
+          avatar_url: profile.avatar_url
+        } : null
+      };
+
       // Ajouter le message à la liste locale
-      setMessages(prev => [...prev, message]);
+      setMessages(prev => [...prev, messageWithProfile]);
 
       // Créer une notification pour l'autre participant
       const { data: conversation } = await supabase
