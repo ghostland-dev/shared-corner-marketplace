@@ -6,7 +6,7 @@ import { ChevronLeft, MapPin, Map, List, Filter, Search as SearchIcon, Loader } 
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import ListingCard from '@/components/ListingCard';
-import SearchFilters from '@/components/SearchFilters';
+import { SearchFilters } from '@/components/SearchFilters';
 import { Button } from '@/components/ui/button';
 import { useSearch } from '@/hooks/useSearch';
 import { useToast } from '@/hooks/use-toast';
@@ -82,7 +82,7 @@ const SearchResults = () => {
               <Filter className="h-5 w-5 mr-2 text-kiwiiz-primary" />
               Affiner votre recherche
             </h2>
-            <SearchFilters onApplyFilters={handleApplyFilters} />
+            <SearchFilters onFiltersChange={handleApplyFilters} />
           </div>
           
           {/* Résultats with improved header */}

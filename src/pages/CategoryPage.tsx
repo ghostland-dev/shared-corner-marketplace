@@ -6,7 +6,7 @@ import { ChevronLeft } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import ListingCard from '@/components/ListingCard';
-import SearchFilters from '@/components/SearchFilters';
+import { SearchFilters } from '@/components/SearchFilters';
 import { categories, listings } from '@/data/mockData';
 
 const CategoryPage = () => {
@@ -73,7 +73,7 @@ const CategoryPage = () => {
           </div>
           
           {/* Filtres */}
-          <SearchFilters onApplyFilters={handleApplyFilters} />
+          <SearchFilters onFiltersChange={handleApplyFilters} />
           
           {/* Liste des annonces */}
           {categoryListings.length > 0 ? (

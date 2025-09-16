@@ -1,148 +1,126 @@
-
-import { useState } from 'react';
-import { Slider } from "@/components/ui/slider";
-import { Filter, ChevronDown, ChevronUp, X } from 'lucide-react';
+import React, { useState } from 'react';
+import { Search, Filter, ChevronDown, ChevronUp, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { categories } from '@/data/categories';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Slider } from '@/components/ui/slider';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
-interface FilterProps {
-  onApplyFilters: (filters: any) => void;
-  initialFilters?: {
-    priceRange?: [number, number];
-    distance?: number;
-    categories?: string[];
-  };
+export interface FilterState {
+  query: string;
+  category: string;
+  location: string;
+  priceRange: [number, number];
+  priceUnit: string;
+  features: string[];
+  sortBy: 'price_asc' | 'price_desc' | 'date_desc' | 'popularity';
 }
 
-const SearchFilters = ({ onApplyFilters, initialFilters }: FilterProps) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [priceRange, setPriceRange] = useState(initialFilters?.priceRange || [0, 200]);
-  const [distance, setDistance] = useState(initialFilters?.distance || 10);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>(initialFilters?.categories || []);
+interface SearchFiltersProps {
+  onFiltersChange: (filters: FilterState) => void;
+  initialFilters?: Partial<FilterState>;
+  className?: string;
+}
 
-  const toggleCategory = (categoryId: string) => {
-    if (selectedCategories.includes(categoryId)) {
-      setSelectedCategories(selectedCategories.filter(c => c !== categoryId));
-    } else {
-      setSelectedCategories([...selectedCategories, categoryId]);
-    }
-  };
+const defaultFilters: FilterState = {
+  query: '',
+  category: '',
+  location: '',
+  priceRange: [0, 1000],
+  priceUnit: 'jour',
+  features: [],
+  sortBy: 'date_desc'
+};
 
-  const clearFilters = () => {
-    setPriceRange([0, 200]);
-    setDistance(10);
-    setSelectedCategories([]);
-  };
+const availableFeatures = [
+  'WiFi', 'Parking', 'Climatisation', 'Animaux acceptés',
+  'Équipement professionnel', 'Livraison possible'
+];
 
-  const applyFilters = () => {
-    onApplyFilters({
-      priceRange,
-      distance,
-      categories: selectedCategories
-    });
-    
-    // Optionnellement, fermer les filtres après application
-    // setIsOpen(false);
+const categories = [
+  { id: 'tools', name: 'Outils' },
+  { id: 'vehicles', name: 'Véhicules' },
+  { id: 'housing', name: 'Logement' },
+  { id: 'books', name: 'Livres' },
+  { id: 'items', name: 'Objets' },
+  { id: 'photo', name: 'Photo' }
+];
+
+export const SearchFilters: React.FC<SearchFiltersProps> = ({
+  onFiltersChange,
+  initialFilters = {},
+  className = ''
+}) => {
+  const [filters, setFilters] = useState<FilterState>({
+    ...defaultFilters,
+    ...initialFilters
+  });
+  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
+
+  const updateFilters = (newFilters: Partial<FilterState>) => {
+    const updatedFilters = { ...filters, ...newFilters };
+    setFilters(updatedFilters);
+    onFiltersChange(updatedFilters);
   };
 
   return (
-    <div className="mb-8 border border-gray-200 rounded-lg overflow-hidden">
-      {/* Header */}
-      <div 
-        className="p-4 bg-gray-50 flex justify-between items-center cursor-pointer"
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        <div className="flex items-center">
-          <Filter className="h-5 w-5 mr-2 text-kiwiiz-primary" />
-          <h3 className="font-medium">Filtrer les résultats</h3>
-        </div>
-        <div>
-          {isOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
-        </div>
-      </div>
+    <Card className={className}>
+      <CardContent className="p-6">
+        <div className="space-y-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+            <Input
+              placeholder="Rechercher une annonce..."
+              value={filters.query}
+              onChange={(e) => updateFilters({ query: e.target.value })}
+              className="pl-10"
+            />
+          </div>
 
-      {/* Filters content */}
-      {isOpen && (
-        <div className="p-6 bg-white">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Price Range */}
-            <div>
-              <h4 className="font-medium mb-4">Prix (€)</h4>
-              <Slider 
-                defaultValue={priceRange}
-                value={priceRange}
-                max={200}
-                step={5}
-                onValueChange={setPriceRange}
-                className="mb-2"
-              />
-              <div className="flex justify-between text-sm text-gray-500">
-                <span>{priceRange[0]}€</span>
-                <span>{priceRange[1]}€</span>
-              </div>
-            </div>
-            
-            {/* Distance */}
-            <div>
-              <h4 className="font-medium mb-4">Distance maximale (km)</h4>
-              <Slider 
-                defaultValue={[distance]} 
-                value={[distance]}
-                max={50}
-                step={1}
-                onValueChange={(value) => setDistance(value[0])}
-                className="mb-2"
-              />
-              <div className="flex justify-between text-sm text-gray-500">
-                <span>0 km</span>
-                <span>{distance} km</span>
-              </div>
-            </div>
-          </div>
-          
-          {/* Categories */}
-          <div className="mt-6">
-            <h4 className="font-medium mb-4">Catégories</h4>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {categories.map((category) => (
-                <div key={category.id} className="flex items-center space-x-2">
-                  <Checkbox 
-                    id={`category-${category.id}`}
-                    checked={selectedCategories.includes(category.id)}
-                    onCheckedChange={() => toggleCategory(category.id)}
-                  />
-                  <label htmlFor={`category-${category.id}`} className="text-sm cursor-pointer flex items-center">
-                    <category.icon className="h-4 w-4 mr-1 text-gray-500" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Select
+              value={filters.category}
+              onValueChange={(value) => updateFilters({ category: value })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Toutes les catégories" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Toutes les catégories</SelectItem>
+                {categories.map((category) => (
+                  <SelectItem key={category.id} value={category.id}>
                     {category.name}
-                  </label>
-                </div>
-              ))}
-            </div>
-          </div>
-          
-          {/* Actions */}
-          <div className="flex justify-between mt-8">
-            <Button 
-              variant="outline" 
-              className="flex items-center"
-              onClick={clearFilters}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Input
+              placeholder="Ville, région..."
+              value={filters.location}
+              onChange={(e) => updateFilters({ location: e.target.value })}
+            />
+
+            <Select
+              value={filters.sortBy}
+              onValueChange={(value: FilterState['sortBy']) => updateFilters({ sortBy: value })}
             >
-              <X className="mr-1 h-4 w-4" />
-              Effacer les filtres
-            </Button>
-            
-            <Button 
-              className="kiwiiz-btn-primary"
-              onClick={applyFilters}
-            >
-              Appliquer les filtres
-            </Button>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="date_desc">Plus récent</SelectItem>
+                <SelectItem value="price_asc">Prix croissant</SelectItem>
+                <SelectItem value="price_desc">Prix décroissant</SelectItem>
+                <SelectItem value="popularity">Popularité</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
-      )}
-    </div>
+      </CardContent>
+    </Card>
   );
 };
-
-export default SearchFilters;

@@ -14,7 +14,9 @@ import { useToast } from '@/hooks/use-toast';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { ContactOwnerButton } from '@/components/ContactOwnerButton';
+import { FavoriteButton } from '@/components/FavoriteButton';
 import { ReservationForm } from '@/components/ReservationForm';
+import { ReviewsSection } from '@/components/ReviewsSection';
 import { useListingDetail } from '@/hooks/listing/useListingDetail';
 import { Listing } from '@/types/supabase';
 import { categories } from '@/data/categories';
@@ -280,6 +282,13 @@ const ListingDetail = () => {
                   </div>
                 </div>
               </div>
+              
+              {/* Section des avis */}
+              <ReviewsSection 
+                listingId={listing.id} 
+                ownerId={listing.owner_id}
+                className="mt-8"
+              />
             </div>
 
             {/* Colonne de droite - Réservation */}

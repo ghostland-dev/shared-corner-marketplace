@@ -23,6 +23,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { useFileUpload } from '@/hooks/useFileUpload';
+import { supabase } from '@/integrations/supabase/client';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
@@ -30,9 +32,12 @@ const Settings = () => {
   const { user, profile, updateProfile, signOut } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { uploadAvatar } = useFileUpload();
   
   const [loading, setLoading] = useState(false);
+  const [avatarUploading, setAvatarUploading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
   
   // États pour les formulaires
   const [profileData, setProfileData] = useState({
@@ -78,6 +83,72 @@ const Settings = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setAvatarUploading(true);
+    try {
+      const { url, error } = await uploadAvatar(file);
+
+      if (error) return;
+
+      if (url) {
+        // Mettre à jour le profil avec la nouvelle URL d'avatar
+        const { error: updateError } = await updateProfile({ avatar_url: url });
+        
+        if (!updateError) {
+          toast({
+            title: "Avatar mis à jour",
+            description: "Votre photo de profil a été mise à jour avec succès",
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error uploading avatar:', error);
+    } finally {
+      setAvatarUploading(false);
+    }
+  };
+
+  const handlePasswordChange = async () => {
+    if (!newPassword || newPassword.length < 6) {
+      toast({
+        title: "Mot de passe invalide",
+        description: "Le mot de passe doit contenir au moins 6 caractères",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword
+      });
+
+      if (error) {
+        toast({
+          title: "Erreur",
+          description: error.message,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setNewPassword('');
+      toast({
+        title: "Mot de passe mis à jour",
+        description: "Votre mot de passe a été changé avec succès",
+      });
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible de changer le mot de passe",
+        variant: "destructive",
+      });
     }
   };
 
@@ -146,15 +217,29 @@ const Settings = () => {
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="flex items-center gap-6">
-                    <Avatar className="w-20 h-20">
-                      <AvatarImage src={profile?.avatar_url} />
-                      <AvatarFallback>
-                        {profileData.full_name?.charAt(0) || user.email?.charAt(0)}
-                      </AvatarFallback>
-                    </Avatar>
+                    <div className="relative">
+                      <Avatar className="w-20 h-20">
+                        <AvatarImage src={profile?.avatar_url} />
+                        <AvatarFallback>
+                          {profileData.full_name?.charAt(0) || user.email?.charAt(0)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleAvatarUpload}
+                        className="hidden"
+                        id="avatar-upload"
+                      />
+                    </div>
                     <div>
-                      <Button variant="outline" size="sm">
-                        Changer la photo
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => document.getElementById('avatar-upload')?.click()}
+                        disabled={avatarUploading}
+                      >
+                        {avatarUploading ? 'Upload...' : 'Changer la photo'}
                       </Button>
                       <p className="text-sm text-muted-foreground mt-1">
                         JPG, PNG jusqu'à 10MB
@@ -393,6 +478,8 @@ const Settings = () => {
                           id="password"
                           type={showPassword ? "text" : "password"}
                           placeholder="••••••••"
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
                         />
                         <Button
                           type="button"
@@ -406,7 +493,7 @@ const Settings = () => {
                       </div>
                     </div>
 
-                    <Button variant="outline">
+                    <Button onClick={handlePasswordChange} disabled={!newPassword}>
                       Changer le mot de passe
                     </Button>
                   </CardContent>
