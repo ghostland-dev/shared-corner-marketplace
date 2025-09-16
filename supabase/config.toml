@@ -1,8 +1,1 @@
-
-project_id = "wsykntbyxbwlgnfbbjct"
-
-[functions.increment-views]
-verify_jwt = true
-
-[functions.get-views]
-verify_jwt = true
+project_id = "***REMOVED***"
