@@ -1,7 +1,11 @@
+import React from 'react';
 import { Link } from 'react-router-dom';
-import { Star, MapPin } from 'lucide-react';
+import { Star, MapPin, Heart, Eye } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { ErrorBoundary } from './ErrorBoundary';
+import { FavoriteButton } from './FavoriteButton';
 
 interface ListingCardProps {
   id: string;
@@ -13,6 +17,8 @@ interface ListingCardProps {
   category: string;
   rating: number;
   distance?: number;
+  views?: number;
+  className?: string;
 }
 
 const ListingCard = ({
@@ -24,55 +30,80 @@ const ListingCard = ({
   location,
   category,
   rating,
-  distance
+  distance,
+  views,
+  className = ''
 }: ListingCardProps) => {
   return (
     <ErrorBoundary>
-      <Link to={`/annonces/${id}`}>
-        <div className="kiwiiz-card overflow-hidden h-full flex flex-col">
-          {/* Image */}
-          <div className="relative h-48 overflow-hidden">
+      <Card className={`overflow-hidden hover:shadow-lg transition-all duration-300 group ${className}`}>
+        <div className="relative">
+          <Link to={`/annonces/${id}`}>
             <img 
               src={imageUrl} 
-              alt={title} 
-              className="w-full h-full object-cover"
+              alt={title}
+              className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+              loading="lazy"
             />
-            <Badge 
-              className="absolute top-3 left-3 bg-kiwiiz-primary text-white" 
-              variant="outline"
-            >
-              {category}
+          </Link>
+          
+          {/* Prix badge */}
+          <div className="absolute top-3 left-3">
+            <Badge className="bg-black/70 text-white border-none">
+              {price.toFixed(2)}€/{priceUnit}
             </Badge>
           </div>
           
-          {/* Content */}
-          <div className="p-4 flex-grow flex flex-col">
-            <h3 className="font-medium text-lg line-clamp-2 mb-2">{title}</h3>
-            
-            <div className="flex items-center text-sm text-gray-500 mb-2">
-              <MapPin className="h-4 w-4 mr-1" />
-              <span>{location}</span>
-              {distance && (
-                <span className="ml-2 text-xs text-kiwiiz-primary font-medium">
-                  {distance < 1 ? (distance * 1000).toFixed(0) + 'm' : distance.toFixed(1) + 'km'}
-                </span>
-              )}
-            </div>
-            
-            <div className="flex items-center text-sm mb-2">
-              <Star className="h-4 w-4 text-yellow-400 mr-1" />
-              <span>{rating.toFixed(1)}</span>
-            </div>
-            
-            <div className="mt-auto">
-              <span className="text-lg font-bold text-kiwiiz-primary">
-                {price.toFixed(2)}€
-              </span>
-              <span className="text-sm text-gray-500 ml-1">/ {priceUnit}</span>
-            </div>
+          {/* Bouton favoris */}
+          <div className="absolute top-3 right-3">
+            <FavoriteButton 
+              listingId={id} 
+              className="bg-white/80 hover:bg-white text-gray-800"
+              size="icon"
+              variant="secondary"
+            />
+          </div>
+          
+          {/* Catégorie */}
+          <div className="absolute bottom-3 left-3">
+            <Badge variant="secondary" className="bg-white/90 text-gray-700">
+              {category}
+            </Badge>
           </div>
         </div>
-      </Link>
+
+        <CardContent className="p-4">
+          <Link to={`/annonces/${id}`} className="block">
+            <h3 className="font-semibold text-lg mb-2 line-clamp-1 group-hover:text-primary transition-colors">
+              {title}
+            </h3>
+          </Link>
+          
+          <div className="flex items-center gap-1 text-sm text-muted-foreground mb-3">
+            <MapPin className="w-4 h-4 flex-shrink-0" />
+            <span className="truncate">{location}</span>
+            {distance && (
+              <span className="ml-1 text-xs">
+                • {distance < 1 ? `${Math.round(distance * 1000)}m` : `${distance.toFixed(1)}km`}
+              </span>
+            )}
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1">
+              <Star className="w-4 h-4 text-yellow-400 fill-current" />
+              <span className="text-sm font-medium">{rating.toFixed(1)}</span>
+            </div>
+            
+            {views !== undefined && (
+              <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                <Eye className="w-4 h-4" />
+                <span>{views}</span>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
     </ErrorBoundary>
   );
 };

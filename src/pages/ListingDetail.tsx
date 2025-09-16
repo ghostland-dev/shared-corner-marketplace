@@ -255,7 +255,7 @@ const ListingDetail = () => {
                 <h2 className="text-xl font-semibold mb-4">À propos du propriétaire</h2>
                 <div className="flex items-start p-6 bg-secondary rounded-lg">
                   <Avatar className="w-16 h-16">
-                    <AvatarImage src={(listing as any).profiles?.avatar_url} />
+                    <AvatarImage src={(listing as any).profiles?.avatar_url || (listing as any).owner?.avatar} />
                     <AvatarFallback>
                       <User className="w-8 h-8" />
                     </AvatarFallback>
@@ -264,6 +264,7 @@ const ListingDetail = () => {
                     <h3 className="font-medium">
                       {(listing as any).profiles?.full_name || 
                        (listing as any).profiles?.username || 
+                       (listing as any).owner?.name || 
                        'Utilisateur'}
                     </h3>
                     <div className="flex items-center text-sm text-muted-foreground mb-3">
@@ -273,7 +274,7 @@ const ListingDetail = () => {
                     <ContactOwnerButton
                       listingId={listing.id}
                       ownerId={listing.owner_id}
-                      ownerName={(listing as any).profiles?.full_name || 'Propriétaire'}
+                      ownerName={(listing as any).profiles?.full_name || (listing as any).owner?.name || 'Propriétaire'}
                       className="w-full sm:w-auto"
                     />
                   </div>

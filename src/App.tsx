@@ -23,6 +23,7 @@ import Dashboard from "./pages/Dashboard";
 import MyListings from "./pages/MyListings";
 import Favorites from "./pages/Favorites";
 import Settings from "./pages/Settings";
+import Profile from "./pages/Profile";
 import TermsOfService from "./pages/legal/TermsOfService";
 import PrivacyPolicy from "./pages/legal/PrivacyPolicy";
 import LegalNotice from "./pages/legal/LegalNotice";
@@ -53,6 +54,8 @@ const App = () => (
             <Route path="/tableau-de-bord" element={<Dashboard />} />
             <Route path="/mes-annonces" element={<MyListings />} />
             <Route path="/favoris" element={<Favorites />} />
+            <Route path="/profil" element={<Profile />} />
+            <Route path="/profil/:userId" element={<Profile />} />
             <Route path="/parametres" element={<Settings />} />
             <Route path="/a-propos" element={<About />} />
             <Route path="/aide" element={<Help />} />

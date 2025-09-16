@@ -1,10 +1,12 @@
 
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, Menu, X, User, Plus, Home, Grid3X3, HelpCircle, MessageCircle } from "lucide-react";
+import { Search, Menu, X, User, Plus, Home, Grid3X3, HelpCircle, MessageCircle, Bell } from "lucide-react";
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { UserProfileMenu } from '@/components/UserProfileMenu';
+import { NotificationDropdown } from '@/components/NotificationDropdown';
 
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -79,6 +81,9 @@ const Navbar = () => {
               </Button>
             </Link>
             {user && (
+              <NotificationDropdown className="text-kiwiiz-dark hover:text-kiwiiz-primary" />
+            )}
+            {user && (
               <Link to="/messages">
                 <Button variant="ghost" className="text-kiwiiz-dark hover:text-kiwiiz-primary transition-colors flex items-center gap-1">
                   <MessageCircle className="h-4 w-4" />
@@ -100,10 +105,7 @@ const Navbar = () => {
                 </Button>
               </Link>
             ) : (
-              <Button variant="outline" className="border-kiwiiz-primary text-kiwiiz-primary hover:bg-kiwiiz-light transition-colors flex items-center gap-1">
-                <User className="h-4 w-4" />
-                <span>{user.email}</span>
-              </Button>
+              <UserProfileMenu />
             )}
           </div>
 
