@@ -18,6 +18,7 @@ import { ReservationForm } from '@/components/ReservationForm';
 import { useListingDetail } from '@/hooks/listing/useListingDetail';
 import { Listing } from '@/types/supabase';
 import { categories } from '@/data/categories';
+import { listings as mockListings } from '@/data/listings';
 
 const ListingDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -35,7 +36,34 @@ const ListingDetail = () => {
     }
   }, [id]);
 
+  const isValidUUID = (val: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val);
+
+  const mapMockToListing = (mock: any): Listing => ({
+    id: mock.id,
+    title: mock.title,
+    description: mock.description,
+    price: mock.price,
+    price_unit: mock.priceUnit,
+    location: mock.location,
+    category_id: mock.categoryId,
+    owner_id: mock.owner?.id || 'mock-owner-id',
+    image_urls: mock.imageUrl ? [mock.imageUrl] : [],
+    features: mock.features || [],
+    is_available: true,
+    views: mock.views || 0,
+    created_at: mock.createdAt || new Date().toISOString(),
+    updated_at: mock.createdAt || new Date().toISOString(),
+  });
+
   const loadListing = async (listingId: string) => {
+    if (!isValidUUID(listingId)) {
+      const mock = mockListings.find((m) => m.id === listingId);
+      if (mock) {
+        setListing(mapMockToListing(mock));
+        return;
+      }
+    }
+
     const { data, error } = await fetchListing(listingId);
     if (data) {
       setListing(data);
