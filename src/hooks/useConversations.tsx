@@ -188,26 +188,34 @@ export const useConversations = () => {
     }
 
     try {
+      // Pour les données de test, créer une conversation sans listing_id si l'ID n'est pas un UUID
+      const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(listingId);
+      
       // Vérifier si une conversation existe déjà
       const { data: existingConversation } = await supabase
         .from('conversations')
         .select('*')
-        .eq('listing_id', listingId)
         .or(`and(participant_1.eq.${user.id},participant_2.eq.${ownerId}),and(participant_1.eq.${ownerId},participant_2.eq.${user.id})`)
-        .single();
+        .maybeSingle();
 
       if (existingConversation) {
         return existingConversation.id;
       }
 
       // Créer une nouvelle conversation
+      const conversationData: any = {
+        participant_1: user.id,
+        participant_2: ownerId
+      };
+
+      // Seulement ajouter listing_id si c'est un UUID valide
+      if (isValidUUID) {
+        conversationData.listing_id = listingId;
+      }
+
       const { data: newConversation, error } = await supabase
         .from('conversations')
-        .insert({
-          listing_id: listingId,
-          participant_1: user.id,
-          participant_2: ownerId
-        })
+        .insert(conversationData)
         .select()
         .single();
 
