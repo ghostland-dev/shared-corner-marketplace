@@ -82,14 +82,14 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Select
-              value={filters.category}
-              onValueChange={(value) => updateFilters({ category: value })}
+              value={filters.category || "all"}
+              onValueChange={(value) => updateFilters({ category: value === "all" ? "" : value })}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Toutes les catégories" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Toutes les catégories</SelectItem>
+                <SelectItem value="all">Toutes les catégories</SelectItem>
                 {categories.map((category) => (
                   <SelectItem key={category.id} value={category.id}>
                     {category.name}
