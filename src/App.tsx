@@ -31,6 +31,8 @@ import CookiePolicy from "./pages/legal/CookiePolicy";
 import { Messages } from "./pages/Messages";
 import MyReservations from "./pages/MyReservations";
 import { SuperAdminDashboard } from "./pages/admin/SuperAdminDashboard";
+import { ClientDashboard } from "./pages/ClientDashboard";
+import { ManagerDashboard } from "./pages/ManagerDashboard";
 
 
 
@@ -54,7 +56,8 @@ const App = () => {
             <Route path="/messages" element={<Messages />} />
             <Route path="/messages/:conversationId" element={<Messages />} />
             <Route path="/mes-reservations" element={<MyReservations />} />
-            <Route path="/tableau-de-bord" element={<Dashboard />} />
+            <Route path="/tableau-de-bord" element={<ClientDashboard />} />
+            <Route path="/manager" element={<ManagerDashboard />} />
             <Route path="/mes-annonces" element={<MyListings />} />
             <Route path="/favoris" element={<Favorites />} />
             <Route path="/profil" element={<Profile />} />

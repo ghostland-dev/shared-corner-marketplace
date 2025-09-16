@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 
-export type UserRole = 'user' | 'admin' | 'super_admin';
+export type UserRole = 'user' | 'admin' | 'super_admin' | 'manager';
 
 interface UserWithRoles {
   id: string;
@@ -140,6 +140,7 @@ export const useUserRoles = () => {
   const hasRole = (role: UserRole) => userRoles.includes(role);
   const isAdmin = () => hasRole('admin') || hasRole('super_admin');
   const isSuperAdmin = () => hasRole('super_admin');
+  const isManager = () => hasRole('manager');
 
   useEffect(() => {
     loadCurrentUserRoles();
@@ -154,6 +155,7 @@ export const useUserRoles = () => {
     removeRole,
     hasRole,
     isAdmin,
+    isManager,
     isSuperAdmin,
   };
 };

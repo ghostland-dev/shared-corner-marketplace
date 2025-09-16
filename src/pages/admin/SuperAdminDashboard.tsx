@@ -194,12 +194,14 @@ export const SuperAdminDashboard = () => {
   const roleLabels: Record<UserRole, string> = {
     user: 'Utilisateur',
     admin: 'Administrateur',
+    manager: 'Manager',
     super_admin: 'Super Admin'
   };
 
   const roleColors: Record<UserRole, string> = {
     user: 'default',
     admin: 'secondary',
+    manager: 'outline',
     super_admin: 'destructive'
   };
 
@@ -283,6 +285,7 @@ export const SuperAdminDashboard = () => {
                             <SelectContent>
                               <SelectItem value="user">Utilisateur</SelectItem>
                               <SelectItem value="admin">Administrateur</SelectItem>
+                              <SelectItem value="manager">Manager</SelectItem>
                               <SelectItem value="super_admin">Super Admin</SelectItem>
                             </SelectContent>
                           </Select>
