@@ -1,15 +1,17 @@
 
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, Menu, X, User, Plus, Home, Grid3X3, HelpCircle } from "lucide-react";
+import { Search, Menu, X, User, Plus, Home, Grid3X3, HelpCircle, MessageCircle } from "lucide-react";
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,18 +76,33 @@ const Navbar = () => {
               <HelpCircle className="h-4 w-4" />
               <span>Aide</span>
             </Button>
+            {user && (
+              <Link to="/messages">
+                <Button variant="ghost" className="text-kiwiiz-dark hover:text-kiwiiz-primary transition-colors flex items-center gap-1">
+                  <MessageCircle className="h-4 w-4" />
+                  <span>Messages</span>
+                </Button>
+              </Link>
+            )}
             <Link to="/deposer-annonce">
               <Button className="kiwiiz-btn-primary hover:shadow-md transition-all flex items-center gap-1">
                 <Plus className="h-4 w-4" />
                 <span>Déposer une annonce</span>
               </Button>
             </Link>
-            <Link to="/auth">
+            {!user ? (
+              <Link to="/auth">
+                <Button variant="outline" className="border-kiwiiz-primary text-kiwiiz-primary hover:bg-kiwiiz-light transition-colors flex items-center gap-1">
+                  <User className="h-4 w-4" />
+                  <span>Connexion</span>
+                </Button>
+              </Link>
+            ) : (
               <Button variant="outline" className="border-kiwiiz-primary text-kiwiiz-primary hover:bg-kiwiiz-light transition-colors flex items-center gap-1">
                 <User className="h-4 w-4" />
-                <span>Connexion</span>
+                <span>{user.email}</span>
               </Button>
-            </Link>
+            )}
           </div>
 
           {/* Mobile menu button with animation */}
@@ -149,6 +166,16 @@ const Navbar = () => {
               <HelpCircle className="h-5 w-5 mr-2 text-kiwiiz-primary" />
               Comment ça marche
             </Link>
+            {user && (
+              <Link 
+                to="/messages"
+                className="px-4 py-2 hover:bg-gray-50 rounded-md flex items-center"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <MessageCircle className="h-5 w-5 mr-2 text-kiwiiz-primary" />
+                Messages
+              </Link>
+            )}
             <Link 
               to="/deposer-annonce" 
               className="kiwiiz-btn-primary text-center flex items-center justify-center"
@@ -157,14 +184,21 @@ const Navbar = () => {
               <Plus className="h-5 w-5 mr-2" />
               Déposer une annonce
             </Link>
-            <Link 
-              to="/auth" 
-              className="px-4 py-2 border border-kiwiiz-primary text-kiwiiz-primary text-center rounded-md hover:bg-kiwiiz-light transition-colors"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              <User className="h-5 w-5 mr-2 inline-block" />
-              Connexion
-            </Link>
+            {!user ? (
+              <Link 
+                to="/auth" 
+                className="px-4 py-2 border border-kiwiiz-primary text-kiwiiz-primary text-center rounded-md hover:bg-kiwiiz-light transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <User className="h-5 w-5 mr-2 inline-block" />
+                Connexion
+              </Link>
+            ) : (
+              <div className="px-4 py-2 border border-kiwiiz-primary text-kiwiiz-primary text-center rounded-md">
+                <User className="h-5 w-5 mr-2 inline-block" />
+                {user.email}
+              </div>
+            )}
           </div>
         </div>
       )}

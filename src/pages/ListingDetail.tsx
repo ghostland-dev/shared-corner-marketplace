@@ -13,6 +13,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { ContactOwnerButton } from '@/components/ContactOwnerButton';
+import { ReservationForm } from '@/components/ReservationForm';
 import { listings } from '@/data/listings';
 
 const ListingDetail = () => {
@@ -243,14 +245,12 @@ const ListingDetail = () => {
                       <Clock className="h-3 w-3 mr-1" />
                       <span>Répond en {listing.owner.responseTime} • Taux de réponse {listing.owner.responseRate}%</span>
                     </div>
-                    <Button 
-                      variant="outline" 
+                    <ContactOwnerButton
+                      listingId={listing.id}
+                      ownerId={listing.owner.id || 'mock-owner-id'}
+                      ownerName={listing.owner.name}
                       className="mt-3 text-kiwiiz-primary border-kiwiiz-primary"
-                      onClick={handleContactOwner}
-                    >
-                      <MessageSquare className="h-4 w-4 mr-2" />
-                      Contacter {listing.owner.name}
-                    </Button>
+                    />
                   </div>
                 </div>
               </div>
@@ -266,51 +266,12 @@ const ListingDetail = () => {
             
             {/* Colonne de droite - Réservation */}
             <div className="lg:col-span-1">
-              <Card>
-                <CardContent className="pt-6">
-                  <h3 className="text-lg font-semibold mb-2">Réserver</h3>
-                  <div className="mb-4">
-                    <CalendarComponent
-                      mode="range"
-                      selected={{
-                        from: startDate,
-                        to: endDate,
-                      }}
-                      onSelect={(range) => range && handleDateChange(range)}
-                      className="rounded border"
-                      locale={fr}
-                    />
-                  </div>
-                  
-                  {/* Résumé */}
-                  <div className="space-y-2 mt-6 border-t pt-4">
-                    <div className="flex justify-between">
-                      <span>Prix par {listing.priceUnit}</span>
-                      <span>{listing.price.toFixed(2)}€</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Durée</span>
-                      <span>{duration} {duration > 1 ? 'jours' : 'jour'}</span>
-                    </div>
-                    <div className="flex justify-between font-medium">
-                      <span>Total</span>
-                      <span>{(listing.price * duration).toFixed(2)}€</span>
-                    </div>
-                  </div>
-                  
-                  <Button 
-                    className="kiwiiz-btn-primary w-full mt-4"
-                    onClick={handleBookNow}
-                  >
-                    Réserver maintenant
-                  </Button>
-                  
-                  <div className="mt-4 text-sm text-gray-500 flex items-center justify-center">
-                    <Shield className="h-4 w-4 mr-1" />
-                    <span>Paiement sécurisé via Kiwiiz</span>
-                  </div>
-                </CardContent>
-              </Card>
+              <ReservationForm
+                listingId={listing.id}
+                price={listing.price}
+                priceUnit={listing.priceUnit}
+                title={listing.title}
+              />
             </div>
           </div>
         </div>

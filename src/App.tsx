@@ -21,6 +21,8 @@ import TermsOfService from "./pages/legal/TermsOfService";
 import PrivacyPolicy from "./pages/legal/PrivacyPolicy";
 import LegalNotice from "./pages/legal/LegalNotice";
 import CookiePolicy from "./pages/legal/CookiePolicy";
+import { Messages } from "./pages/Messages";
+import MyReservations from "./pages/MyReservations";
 
 const queryClient = new QueryClient();
 
@@ -39,6 +41,9 @@ const App = () => (
             <Route path="/categories/:categoryId" element={<CategoryPage />} />
             <Route path="/deposer-annonce" element={<CreateListing />} />
             <Route path="/recherche" element={<SearchResults />} />
+            <Route path="/messages" element={<Messages />} />
+            <Route path="/messages/:conversationId" element={<Messages />} />
+            <Route path="/mes-reservations" element={<MyReservations />} />
             <Route path="/comment-ca-marche" element={<HowItWorks />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/faq" element={<FAQ />} />

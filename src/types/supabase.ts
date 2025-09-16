@@ -1,6 +1,7 @@
 
 export type Profile = {
   id: string;
+  user_id: string;
   username: string | null;
   avatar_url: string | null;
   full_name: string | null;
@@ -65,12 +66,20 @@ export type Subscription = {
   updated_at: string;
 }
 
-export type Review = {
+export type Conversation = {
   id: string;
-  listing_id: string;
-  reviewer_id: string;
-  owner_id: string;
-  rating: number;
-  comment: string | null;
+  listing_id: string | null;
+  participant_1: string;
+  participant_2: string;
+  last_message_at: string;
+  created_at: string;
+}
+
+export type Message = {
+  id: string;
+  conversation_id: string;
+  sender_id: string;
+  content: string;
+  read: boolean;
   created_at: string;
 }
