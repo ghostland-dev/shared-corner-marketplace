@@ -188,8 +188,24 @@ export const useConversations = () => {
     }
 
     try {
-      // Pour les données de test, créer une conversation sans listing_id si l'ID n'est pas un UUID
-      const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(listingId);
+      // Vérifier si les IDs sont des UUID valides
+      const isValidUUID = (id: string) => 
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+      
+      const isListingValidUUID = isValidUUID(listingId);
+      const isOwnerValidUUID = isValidUUID(ownerId);
+
+      // Pour les données de test avec des IDs non-UUID, utiliser une approche différente
+      if (!isOwnerValidUUID) {
+        // Créer une conversation temporaire avec l'ID utilisateur réel
+        // mais sans listing_id puisque c'est des données mock
+        toast({
+          title: "Fonctionnalité de démonstration",
+          description: "Cette fonctionnalité n'est disponible qu'avec de vraies données utilisateur. Veuillez créer un compte et publier une vraie annonce.",
+          variant: "destructive",
+        });
+        return null;
+      }
       
       // Vérifier si une conversation existe déjà
       const { data: existingConversation } = await supabase
@@ -209,7 +225,7 @@ export const useConversations = () => {
       };
 
       // Seulement ajouter listing_id si c'est un UUID valide
-      if (isValidUUID) {
+      if (isListingValidUUID) {
         conversationData.listing_id = listingId;
       }
 
@@ -221,12 +237,30 @@ export const useConversations = () => {
 
       if (error) throw error;
 
+      // Envoyer un message d'introduction automatique
+      const introMessage = isListingValidUUID 
+        ? `Bonjour, je suis intéressé(e) par votre annonce.`
+        : `Bonjour, j'aimerais vous contacter.`;
+
+      await supabase
+        .from('messages')
+        .insert({
+          conversation_id: newConversation.id,
+          sender_id: user.id,
+          content: introMessage
+        });
+
+      toast({
+        title: "Conversation créée",
+        description: "Vous pouvez maintenant échanger avec le propriétaire",
+      });
+
       return newConversation.id;
     } catch (error) {
       console.error('Error creating conversation:', error);
       toast({
         title: "Erreur",
-        description: "Impossible de créer la conversation",
+        description: "Impossible de créer la conversation. Assurez-vous d'être connecté avec un compte valide.",
         variant: "destructive",
       });
       return null;

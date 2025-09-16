@@ -277,6 +277,8 @@ const ListingDetail = () => {
                       listingId={listing.id}
                       ownerId={listing.owner_id}
                       ownerName={(listing as any).profiles?.full_name || (listing as any).owner?.name || 'Propriétaire'}
+                      ownerEmail={(listing as any).profiles?.email}
+                      ownerPhone={(listing as any).profiles?.phone_number}
                       className="w-full sm:w-auto"
                     />
                   </div>
