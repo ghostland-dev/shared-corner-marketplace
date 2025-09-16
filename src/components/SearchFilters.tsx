@@ -95,9 +95,10 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
   };
 
   const handleCategoryChange = (val: string) => {
-    setCategory(val);
-    onCategoryChange?.(val);
-    emitFiltersChange({ category: val });
+    const category = val === "all" ? "" : val;
+    setCategory(category);
+    onCategoryChange?.(category);
+    emitFiltersChange({ category });
   };
 
   const handlePriceRangeChange = (values: number[]) => {
@@ -117,7 +118,7 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
   const resetFilters = () => {
     handleQueryChange('');
     handleLocationChange('');
-    handleCategoryChange('');
+    handleCategoryChange('all');
     handlePriceRangeChange([0, 1000]);
   };
 
@@ -156,12 +157,12 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
             </div>
 
             {/* Category Select */}
-            <Select value={category} onValueChange={handleCategoryChange}>
+            <Select value={category || "all"} onValueChange={handleCategoryChange}>
               <SelectTrigger className="md:w-48">
                 <SelectValue placeholder="Catégorie" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Toutes les catégories</SelectItem>
+                <SelectItem value="all">Toutes les catégories</SelectItem>
                 {categories.map((cat) => (
                   <SelectItem key={cat.id} value={cat.id}>
                     {cat.name}
