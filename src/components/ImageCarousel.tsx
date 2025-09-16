@@ -135,7 +135,10 @@ export const ImageCarousel = ({
 
       {/* Modal plein écran */}
       <Dialog open={isFullscreen} onOpenChange={setIsFullscreen}>
-        <DialogContent className="max-w-[95vw] max-h-[95vh] p-0">
+        <DialogContent className="max-w-[95vw] max-h-[95vh] p-0" aria-describedby="image-gallery-description">
+          <div className="sr-only" id="image-gallery-description">
+            Galerie d'images en plein écran pour {title}
+          </div>
           <div className="relative w-full h-full">
             <Button
               variant="ghost"

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from './use-toast';
+import { isValidUUID } from '@/lib/utils-app';
 
 export type Review = {
   id: string;
@@ -28,11 +29,17 @@ export const useReviews = () => {
   const loadReviews = async (listingId: string) => {
     setLoading(true);
     try {
+      // Vérifier si l'ID est un UUID valide pour Supabase
+      if (!isValidUUID(listingId)) {
+        setReviews([]);
+        setLoading(false);
+        return;
+      }
       const { data, error } = await supabase
         .from('reviews')
         .select(`
           *,
-          reviewer_profile:profiles!reviews_reviewer_id_fkey(
+          reviewer_profile:profiles(
             id, username, full_name, avatar_url
           )
         `)
@@ -70,6 +77,16 @@ export const useReviews = () => {
     }
 
     try {
+      // Vérifier si l'ID est un UUID valide pour Supabase
+      if (!isValidUUID(listingId)) {
+        toast({
+          title: "Erreur",
+          description: "ID d'annonce invalide",
+          variant: "destructive",
+        });
+        return { success: false, error: new Error('Invalid listing ID') };
+      }
+
       // Vérifier que l'utilisateur a bien eu une réservation terminée pour cette annonce
       const { data: reservation, error: reservationError } = await supabase
         .from('reservations')
@@ -126,7 +143,7 @@ export const useReviews = () => {
         })
         .select(`
           *,
-          reviewer_profile:profiles!reviews_reviewer_id_fkey(
+          reviewer_profile:profiles(
             id, username, full_name, avatar_url
           )
         `)
@@ -162,6 +179,11 @@ export const useReviews = () => {
 
   const canUserReview = async (listingId: string): Promise<boolean> => {
     if (!user) return false;
+
+    // Vérifier si l'ID est un UUID valide pour Supabase
+    if (!isValidUUID(listingId)) {
+      return false;
+    }
 
     try {
       // Vérifier qu'il y a une réservation terminée

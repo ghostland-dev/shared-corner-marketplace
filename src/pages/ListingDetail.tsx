@@ -22,6 +22,7 @@ import { useListingDetail } from '@/hooks/listing/useListingDetail';
 import { Listing } from '@/types/supabase';
 import { categories } from '@/data/categories';
 import { listings as mockListings } from '@/data/listings';
+import { isValidUUID } from '@/lib/utils-app';
 
 const ListingDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -39,7 +40,6 @@ const ListingDetail = () => {
     }
   }, [id]);
 
-  const isValidUUID = (val: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val);
 
   const mapMockToListing = (mock: any): Listing => ({
     id: mock.id,

@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Listing } from '@/types/supabase';
 import { useToast } from '@/hooks/use-toast';
+import { isValidUUID } from '@/lib/utils-app';
 
 interface IncrementViewsBody {
   listing_id: string;
@@ -15,30 +16,30 @@ export const useListingDetail = () => {
   const fetchListing = async (id: string): Promise<{ data: Listing | null; error: any }> => {
     setLoading(true);
     try {
-      // Incrémenter les vues si l'ID est un UUID valide
-      const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
-      
-      if (isValidUUID) {
-        await supabase.functions.invoke('increment-views', {
-          body: { listing_id: id } as IncrementViewsBody
-        });
+      // Vérifier si l'ID est un UUID valide pour Supabase
+      if (!isValidUUID(id)) {
+        return { data: null, error: new Error('Invalid UUID format') };
       }
+
+      // Incrémenter les vues
+      await supabase.functions.invoke('increment-views', {
+        body: { listing_id: id } as IncrementViewsBody
+      });
 
       // Récupérer l'annonce
       const { data: listing, error } = await supabase
         .from('listings')
         .select('*')
         .eq('id', id)
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error fetching listing:', error);
-        toast({
-          title: "Erreur",
-          description: "Impossible de charger l'annonce",
-          variant: "destructive",
-        });
         return { data: null, error };
+      }
+
+      if (!listing) {
+        return { data: null, error: new Error('Listing not found') };
       }
 
       // Récupérer le profil du propriétaire séparément
@@ -48,7 +49,7 @@ export const useListingDetail = () => {
           .from('profiles')
           .select('user_id, username, full_name, avatar_url')
           .eq('user_id', listing.owner_id)
-          .single();
+          .maybeSingle();
         
         profileData = profile;
       }

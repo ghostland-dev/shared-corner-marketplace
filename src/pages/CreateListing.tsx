@@ -412,6 +412,9 @@ const CreateListing = () => {
                   {/* Images */}
                   <div>
                     <h3 className="font-medium mb-3">Photos</h3>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Ajoutez des photos attrayantes de votre objet ou service. La première photo sera utilisée comme image principale.
+                    </p>
                     
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-4">
                       {images.map((img, index) => (

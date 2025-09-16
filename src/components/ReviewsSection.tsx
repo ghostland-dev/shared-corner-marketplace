@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { useReviews, Review } from '@/hooks/useReviews';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { isValidUUID } from '@/lib/utils-app';
 
 interface ReviewsSectionProps {
   listingId: string;
@@ -34,14 +35,24 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
   const [hasCompletedReservation, setHasCompletedReservation] = useState(false);
 
   useEffect(() => {
-    loadReviews(listingId);
-    
-    if (user) {
-      checkUserReviewEligibility();
+    // Vérifier si l'ID est un UUID valide pour Supabase
+    if (isValidUUID(listingId)) {
+      loadReviews(listingId);
+      
+      if (user) {
+        checkUserReviewEligibility();
+      }
     }
   }, [listingId, user]);
 
   const checkUserReviewEligibility = async () => {
+    // Vérifier si l'ID est un UUID valide pour Supabase
+    if (!isValidUUID(listingId)) {
+      setCanReview(false);
+      setHasCompletedReservation(false);
+      return;
+    }
+
     const canReviewListing = await canUserReview(listingId);
     setCanReview(canReviewListing);
     
