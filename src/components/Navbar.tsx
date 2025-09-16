@@ -72,10 +72,12 @@ const Navbar = () => {
                 <span>Catégories</span>
               </Button>
             </Link>
-            <Button variant="ghost" className="text-kiwiiz-dark hover:text-kiwiiz-primary transition-colors flex items-center gap-1">
-              <HelpCircle className="h-4 w-4" />
-              <span>Aide</span>
-            </Button>
+            <Link to="/aide">
+              <Button variant="ghost" className="text-kiwiiz-dark hover:text-kiwiiz-primary transition-colors flex items-center gap-1">
+                <HelpCircle className="h-4 w-4" />
+                <span>Aide</span>
+              </Button>
+            </Link>
             {user && (
               <Link to="/messages">
                 <Button variant="ghost" className="text-kiwiiz-dark hover:text-kiwiiz-primary transition-colors flex items-center gap-1">

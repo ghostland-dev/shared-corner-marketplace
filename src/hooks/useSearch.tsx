@@ -1,102 +1,124 @@
-
-import { useState, useCallback } from 'react';
-import { listings } from '@/data/listings';
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { Listing } from '@/types/supabase';
+import { useToast } from './use-toast';
 
 interface SearchFilters {
-  query?: string;
-  categoryId?: string;
-  priceMin?: number;
-  priceMax?: number;
+  category?: string;
   location?: string;
-  maxDistance?: number;
+  minPrice?: number;
+  maxPrice?: number;
+  available?: boolean;
 }
 
 export const useSearch = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [results, setResults] = useState(listings);
-  const [filters, setFilters] = useState<SearchFilters>({});
+  const [results, setResults] = useState<Listing[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [totalCount, setTotalCount] = useState(0);
+  const { toast } = useToast();
 
-  // Fonction de recherche
-  const search = useCallback(async (newFilters: SearchFilters) => {
-    setIsLoading(true);
-    
+  const search = async (
+    query: string, 
+    filters: SearchFilters = {}, 
+    page: number = 0, 
+    limit: number = 20
+  ) => {
+    setLoading(true);
     try {
-      // Mettre à jour les filtres
-      const updatedFilters = { ...filters, ...newFilters };
-      setFilters(updatedFilters);
-      
-      // Simuler un délai de recherche
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      // Filtrer les résultats
-      let filteredResults = [...listings];
-      
-      // Filtre par requête textuelle
-      if (updatedFilters.query) {
-        const query = updatedFilters.query.toLowerCase();
-        filteredResults = filteredResults.filter(
-          item => item.title.toLowerCase().includes(query) || 
-                  item.description.toLowerCase().includes(query)
-        );
-      }
-      
-      // Filtre par catégorie
-      if (updatedFilters.categoryId) {
-        filteredResults = filteredResults.filter(
-          item => item.categoryId === updatedFilters.categoryId
-        );
-      }
-      
-      // Filtre par prix min
-      if (updatedFilters.priceMin !== undefined) {
-        filteredResults = filteredResults.filter(
-          item => item.price >= updatedFilters.priceMin!
-        );
-      }
-      
-      // Filtre par prix max
-      if (updatedFilters.priceMax !== undefined) {
-        filteredResults = filteredResults.filter(
-          item => item.price <= updatedFilters.priceMax!
-        );
-      }
-      
-      // Filtre par localisation
-      if (updatedFilters.location) {
-        const location = updatedFilters.location.toLowerCase();
-        filteredResults = filteredResults.filter(
-          item => item.location.toLowerCase().includes(location)
-        );
-      }
-      
-      // Filtre par distance max (simulé - normalement utilisé avec géolocalisation)
-      if (updatedFilters.maxDistance !== undefined) {
-        filteredResults = filteredResults.filter(
-          item => (item.distance || 0) <= updatedFilters.maxDistance!
-        );
-      }
-      
-      setResults(filteredResults);
-      return filteredResults;
-    } catch (error) {
-      console.error("Erreur lors de la recherche:", error);
-      return [];
-    } finally {
-      setIsLoading(false);
-    }
-  }, [filters]);
+      let supabaseQuery = supabase
+        .from('listings')
+        .select(`
+          *,
+          profiles:owner_id (
+            username,
+            full_name,
+            avatar_url
+          )
+        `, { count: 'exact' })
+        .eq('is_available', true);
 
-  // Réinitialiser les filtres
-  const resetFilters = useCallback(() => {
-    setFilters({});
-    setResults(listings);
-  }, []);
+      // Recherche textuelle
+      if (query && query.trim()) {
+        supabaseQuery = supabaseQuery.or(
+          `title.ilike.%${query}%,description.ilike.%${query}%,location.ilike.%${query}%`
+        );
+      }
+
+      // Filtres
+      if (filters.category) {
+        supabaseQuery = supabaseQuery.eq('category_id', filters.category);
+      }
+
+      if (filters.location) {
+        supabaseQuery = supabaseQuery.ilike('location', `%${filters.location}%`);
+      }
+
+      if (filters.minPrice !== undefined) {
+        supabaseQuery = supabaseQuery.gte('price', filters.minPrice);
+      }
+
+      if (filters.maxPrice !== undefined) {
+        supabaseQuery = supabaseQuery.lte('price', filters.maxPrice);
+      }
+
+      // Pagination
+      const from = page * limit;
+      const to = from + limit - 1;
+      supabaseQuery = supabaseQuery.range(from, to);
+
+      // Tri par pertinence et date
+      supabaseQuery = supabaseQuery.order('views', { ascending: false });
+      supabaseQuery = supabaseQuery.order('created_at', { ascending: false });
+
+      const { data, error, count } = await supabaseQuery;
+
+      if (error) throw error;
+
+      setResults(data || []);
+      setTotalCount(count || 0);
+
+      return {
+        results: data || [],
+        totalCount: count || 0,
+        hasMore: (count || 0) > (page + 1) * limit
+      };
+    } catch (error) {
+      console.error('Search error:', error);
+      toast({
+        title: "Erreur de recherche",
+        description: "Impossible d'effectuer la recherche",
+        variant: "destructive",
+      });
+      return {
+        results: [],
+        totalCount: 0,
+        hasMore: false
+      };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const searchByCategory = async (categoryId: string, page: number = 0, limit: number = 20) => {
+    return search('', { category: categoryId }, page, limit);
+  };
+
+  const searchNearby = async (location: string, page: number = 0, limit: number = 20) => {
+    return search('', { location }, page, limit);
+  };
+
+  const clearResults = () => {
+    setResults([]);
+    setTotalCount(0);
+  };
 
   return {
-    search,
-    resetFilters,
     results,
-    filters,
-    isLoading
+    loading,
+    totalCount,
+    search,
+    searchByCategory,
+    searchNearby,
+    clearResults
   };
 };

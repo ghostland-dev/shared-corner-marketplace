@@ -17,6 +17,12 @@ import Auth from "./pages/Auth";
 import Contact from "./pages/Contact";
 import FAQ from "./pages/FAQ";
 import HowItWorks from "./pages/HowItWorks";
+import About from "./pages/About";
+import Help from "./pages/Help";
+import Dashboard from "./pages/Dashboard";
+import MyListings from "./pages/MyListings";
+import Favorites from "./pages/Favorites";
+import Settings from "./pages/Settings";
 import TermsOfService from "./pages/legal/TermsOfService";
 import PrivacyPolicy from "./pages/legal/PrivacyPolicy";
 import LegalNotice from "./pages/legal/LegalNotice";
@@ -44,6 +50,12 @@ const App = () => (
             <Route path="/messages" element={<Messages />} />
             <Route path="/messages/:conversationId" element={<Messages />} />
             <Route path="/mes-reservations" element={<MyReservations />} />
+            <Route path="/tableau-de-bord" element={<Dashboard />} />
+            <Route path="/mes-annonces" element={<MyListings />} />
+            <Route path="/favoris" element={<Favorites />} />
+            <Route path="/parametres" element={<Settings />} />
+            <Route path="/a-propos" element={<About />} />
+            <Route path="/aide" element={<Help />} />
             <Route path="/comment-ca-marche" element={<HowItWorks />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/faq" element={<FAQ />} />

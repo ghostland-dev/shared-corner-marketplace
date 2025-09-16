@@ -13,7 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 
 const SearchResults = () => {
   const locationRouter = useLocation();
-  const { search, results, isLoading } = useSearch();
+  const { search, results, loading } = useSearch();
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
   const { toast } = useToast();
   
@@ -31,9 +31,11 @@ const SearchResults = () => {
       location: locationParam || undefined
     };
     
-    // Only search if we have parameters to search with
     if (query || category || locationParam) {
-      search(searchParams);
+      search(query, { 
+        category: category || undefined,
+        location: locationParam || undefined 
+      });
     }
   }, [locationRouter.search]);
   
@@ -123,7 +125,7 @@ const SearchResults = () => {
           </div>
           
           {/* Results display with animations */}
-          {isLoading ? (
+        {loading ? (
             // Enhanced loading skeleton
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {[...Array(4)].map((_, i) => (
@@ -149,13 +151,13 @@ const SearchResults = () => {
                     <ListingCard
                       id={listing.id}
                       title={listing.title}
-                      price={listing.price}
-                      priceUnit={listing.priceUnit}
-                      imageUrl={listing.imageUrl}
-                      location={listing.location}
-                      category={listing.category}
-                      rating={listing.rating}
-                      distance={listing.distance}
+                  price={listing.price}
+                  priceUnit={listing.price_unit}
+                  imageUrl={listing.image_urls?.[0] || '/placeholder.svg'}
+                  location={listing.location}
+                  category={listing.category_id}
+                  rating={4.5}
+                  distance={2}
                     />
                   </div>
                 ))}
