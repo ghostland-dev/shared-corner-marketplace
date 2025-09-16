@@ -1,4 +1,5 @@
 import React from 'react';
+// Fixed imports to ensure all lucide-react icons are valid
 import { Bell, Check, Trash2, MessageSquare, Calendar, CreditCard, Settings } from 'lucide-react';
 import {
   DropdownMenu,
