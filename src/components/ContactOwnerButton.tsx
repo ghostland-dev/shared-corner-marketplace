@@ -10,6 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useConversations } from '@/hooks/useConversations';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ContactOwnerButtonProps {
   listingId: string;
@@ -17,6 +18,7 @@ interface ContactOwnerButtonProps {
   ownerName?: string;
   ownerEmail?: string;
   ownerPhone?: string;
+  listingTitle?: string;
   className?: string;
 }
 
@@ -26,6 +28,7 @@ export const ContactOwnerButton: React.FC<ContactOwnerButtonProps> = ({
   ownerName,
   ownerEmail,
   ownerPhone,
+  listingTitle,
   className
 }) => {
   const { user } = useAuth();
@@ -74,18 +77,41 @@ export const ContactOwnerButton: React.FC<ContactOwnerButtonProps> = ({
     }
 
     try {
-      const conversationId = await createOrFindConversation(listingId, ownerId);
-      if (conversationId) {
-        // TODO: Envoyer le message directement
+      if (contactMethod === 'message') {
+        const conversationId = await createOrFindConversation(listingId, ownerId);
+        if (conversationId) {
+          setDialogOpen(false);
+          setMessage('');
+          navigate(`/messages/${conversationId}`);
+          toast({
+            title: "Message envoyé",
+            description: "Votre message a été envoyé au propriétaire",
+          });
+        }
+      } else if (contactMethod === 'email' && ownerEmail) {
+        // Envoi via edge function
+        const { data, error } = await supabase.functions.invoke('contact-owner', {
+          body: {
+            listingId,
+            ownerEmail,
+            senderName: user.user_metadata?.full_name || 'Utilisateur',
+            senderEmail: user.email,
+            message,
+            listingTitle: listingTitle || `Annonce ${listingId}`
+          }
+        });
+
+        if (error) throw error;
+
         setDialogOpen(false);
         setMessage('');
-        navigate(`/messages/${conversationId}`);
         toast({
-          title: "Message envoyé",
-          description: "Votre message a été envoyé au propriétaire",
+          title: "Email envoyé",
+          description: "Votre message a été envoyé par email au propriétaire",
         });
       }
     } catch (error) {
+      console.error('Error sending message:', error);
       toast({
         title: "Erreur",
         description: "Impossible d'envoyer le message",

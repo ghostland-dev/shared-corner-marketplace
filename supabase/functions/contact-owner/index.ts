@@ -1,4 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { Resend } from "npm:resend@2.0.0";
+
+const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -49,29 +52,79 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    // Pour l'instant, on retourne une réponse simulée
-    // En production, vous pouvez intégrer Resend ou un autre service d'email
-    console.log("Email contact request:", {
+    // Validation email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(ownerEmail) || !emailRegex.test(senderEmail)) {
+      return new Response(
+        JSON.stringify({ error: "Format d'email invalide" }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
+    }
+
+    console.log("Sending email via Resend:", {
       to: ownerEmail,
       from: senderEmail,
       senderName,
-      message,
       listingTitle,
       listingId
     });
 
-    // Simulation d'envoi d'email réussi
-    const emailResponse = {
-      id: `contact_${Date.now()}`,
-      to: ownerEmail,
+    // Envoi de l'email via Resend
+    const emailResponse = await resend.emails.send({
+      from: "Location App <onboarding@resend.dev>", // Vous devrez configurer votre domaine
+      to: [ownerEmail],
+      replyTo: senderEmail,
       subject: `Nouvelle demande de contact pour "${listingTitle}"`,
-      status: "sent"
-    };
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #333;">Nouvelle demande de contact</h2>
+          
+          <div style="background-color: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="margin-top: 0;">Annonce concernée :</h3>
+            <p style="font-weight: bold; font-size: 16px;">${listingTitle}</p>
+          </div>
+
+          <div style="margin: 20px 0;">
+            <h3>Message de ${senderName} :</h3>
+            <div style="background-color: #fff; border-left: 4px solid #007bff; padding: 15px; margin: 10px 0;">
+              <p style="margin: 0; line-height: 1.6;">${message.replace(/\n/g, '<br>')}</p>
+            </div>
+          </div>
+
+          <div style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin: 20px 0;">
+            <h4 style="margin-top: 0;">Coordonnées du contact :</h4>
+            <p><strong>Nom :</strong> ${senderName}</p>
+            <p><strong>Email :</strong> ${senderEmail}</p>
+          </div>
+
+          <div style="margin: 30px 0; text-align: center;">
+            <p style="color: #666; font-size: 14px;">
+              Vous pouvez répondre directement à cet email pour contacter ${senderName}.
+            </p>
+          </div>
+
+          <div style="border-top: 1px solid #eee; padding-top: 20px; margin-top: 30px; text-align: center;">
+            <p style="color: #999; font-size: 12px;">
+              Cet email a été envoyé via votre plateforme de location.
+            </p>
+          </div>
+        </div>
+      `,
+    });
+
+    console.log("Email sent successfully:", emailResponse);
 
     return new Response(JSON.stringify({
       success: true,
-      message: "Votre message a été envoyé au propriétaire",
-      data: emailResponse
+      message: "Votre message a été envoyé au propriétaire par email",
+      data: {
+        id: emailResponse.data?.id,
+        to: ownerEmail,
+        subject: `Nouvelle demande de contact pour "${listingTitle}"`
+      }
     }), {
       status: 200,
       headers: {
@@ -81,9 +134,18 @@ const handler = async (req: Request): Promise<Response> => {
     });
   } catch (error: any) {
     console.error("Error in contact-owner function:", error);
+    
+    // Gestion des erreurs spécifiques de Resend
+    let errorMessage = "Erreur lors de l'envoi du message";
+    if (error.message?.includes("API key")) {
+      errorMessage = "Erreur de configuration du service d'email";
+    } else if (error.message?.includes("domain")) {
+      errorMessage = "Domaine email non configuré";
+    }
+
     return new Response(
       JSON.stringify({ 
-        error: "Erreur lors de l'envoi du message",
+        error: errorMessage,
         details: error.message 
       }),
       {
