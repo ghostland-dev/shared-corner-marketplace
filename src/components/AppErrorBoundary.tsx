@@ -107,7 +107,7 @@ interface ErrorBoundaryState {
   error?: Error;
 }
 
-export class AppErrorBoundary extends React.Component<
+class AppErrorBoundary extends React.Component<
   React.PropsWithChildren<{ fallback?: React.ComponentType<AppErrorFallbackProps> }>,
   ErrorBoundaryState
 > {
@@ -142,3 +142,5 @@ export class AppErrorBoundary extends React.Component<
     return this.props.children;
   }
 }
+
+export { AppErrorBoundary };
