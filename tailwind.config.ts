@@ -45,6 +45,14 @@ export default {
 					DEFAULT: 'hsl(var(--accent))',
 					foreground: 'hsl(var(--accent-foreground))'
 				},
+				success: {
+					DEFAULT: 'hsl(var(--success))',
+					foreground: 'hsl(var(--success-foreground))'
+				},
+				warning: {
+					DEFAULT: 'hsl(var(--warning))',
+					foreground: 'hsl(var(--warning-foreground))'
+				},
 				popover: {
 					DEFAULT: 'hsl(var(--popover))',
 					foreground: 'hsl(var(--popover-foreground))'
@@ -63,17 +71,13 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Couleurs personnalisées pour notre marketplace
-				kiwiiz: {
-					primary: '#4CAF50',    // Vert principal
-					secondary: '#2196F3',  // Bleu secondaire
-					accent: '#FF9800',     // Orange accent
-					light: '#E8F5E9',      // Vert clair pour fond
-					dark: '#1B5E20',       // Vert foncé
-					'gray-light': '#F5F5F5', 
-					'gray-medium': '#EEEEEE',
-					'gray-dark': '#757575'
-				},
+				// Couleurs de marque harmonisées avec le système HSL
+				brand: {
+					light: 'hsl(var(--brand-light))',
+					dark: 'hsl(var(--brand-dark))',
+					'gradient-from': 'hsl(var(--brand-gradient-from))',
+					'gradient-to': 'hsl(var(--brand-gradient-to))'
+				}
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

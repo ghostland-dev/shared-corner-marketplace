@@ -126,13 +126,13 @@ const MyReservations = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'pending':
-        return <Badge variant="outline" className="text-orange-600 border-orange-600"><AlertCircle className="w-3 h-3 mr-1" />En attente</Badge>;
+        return <Badge className="status-badge status-pending"><AlertCircle className="w-3 h-3 mr-1" />En attente</Badge>;
       case 'confirmed':
-        return <Badge variant="outline" className="text-green-600 border-green-600"><CheckCircle className="w-3 h-3 mr-1" />Confirmée</Badge>;
+        return <Badge className="status-badge status-confirmed"><CheckCircle className="w-3 h-3 mr-1" />Confirmée</Badge>;
       case 'cancelled':
-        return <Badge variant="outline" className="text-red-600 border-red-600"><XCircle className="w-3 h-3 mr-1" />Annulée</Badge>;
+        return <Badge className="status-badge status-cancelled"><XCircle className="w-3 h-3 mr-1" />Annulée</Badge>;
       case 'completed':
-        return <Badge variant="outline" className="text-blue-600 border-blue-600"><CheckCircle className="w-3 h-3 mr-1" />Terminée</Badge>;
+        return <Badge className="status-badge status-completed"><CheckCircle className="w-3 h-3 mr-1" />Terminée</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -210,8 +210,11 @@ const MyReservations = () => {
                   size="sm"
                   onClick={() => handleStatusUpdate(reservation.id, 'confirmed')}
                   disabled={loading}
-                  className="bg-green-600 hover:bg-green-700"
+                  className="bg-success hover:bg-success/90 text-success-foreground"
                 >
+                  <CheckCircle className="w-4 h-4 mr-1" />
+                  Accepter
+                </Button>
                   <CheckCircle className="w-4 h-4 mr-1" />
                   Accepter
                 </Button>
@@ -220,7 +223,7 @@ const MyReservations = () => {
                   variant="outline"
                   onClick={() => handleStatusUpdate(reservation.id, 'cancelled')}
                   disabled={loading}
-                  className="border-red-600 text-red-600 hover:bg-red-50"
+                  className="border-destructive text-destructive hover:bg-destructive/10"
                 >
                   <XCircle className="w-4 h-4 mr-1" />
                   Refuser

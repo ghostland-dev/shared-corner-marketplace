@@ -58,11 +58,11 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
         {[1, 2, 3, 4, 5].map((star) => (
           <Star
             key={star}
-            className={`w-5 h-5 cursor-pointer transition-colors ${
+            className={`w-5 h-5 transition-colors ${
               star <= rating 
-                ? 'text-yellow-400 fill-current' 
-                : 'text-gray-300'
-            } ${interactive ? 'hover:text-yellow-400' : ''}`}
+                ? 'text-warning fill-current' 
+                : 'text-muted-foreground'
+            } ${interactive ? 'cursor-pointer hover:text-warning' : ''}`}
             onClick={() => interactive && onRatingChange?.(star)}
           />
         ))}

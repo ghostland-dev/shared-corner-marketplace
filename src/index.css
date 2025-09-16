@@ -14,26 +14,48 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 142 71% 45%;  /* Vert Kiwiiz */
-    --primary-foreground: 0 0% 100%; /* Blanc sur fond vert */
+    --primary: 122 39% 49%;  /* Vert principal #4CAF50 */
+    --primary-foreground: 0 0% 100%; 
 
-    --secondary: 210 100% 50%; /* Bleu Kiwiiz */
-    --secondary-foreground: 0 0% 100%; /* Blanc sur fond bleu */
+    --secondary: 207 90% 54%; /* Bleu secondaire #2196F3 */
+    --secondary-foreground: 0 0% 100%; 
 
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 36 100% 50%; /* Orange accent */
-    --accent-foreground: 0 0% 20%;
+    --accent: 36 100% 54%; /* Orange accent #FF9800 */
+    --accent-foreground: 0 0% 0%;
+
+    --success: 122 39% 49%; /* Même que primary pour cohérence */
+    --success-foreground: 0 0% 100%;
+
+    --warning: 45 100% 51%; /* Jaune pour les avertissements */
+    --warning-foreground: 0 0% 0%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 142 71% 45%;
+    --ring: 122 39% 49%;
 
-    --radius: 0.5rem;
+    /* Couleurs de marque supplémentaires */
+    --brand-light: 122 23% 95%; /* Vert très clair pour fonds */
+    --brand-dark: 122 61% 20%; /* Vert foncé pour textes */
+    --brand-gradient-from: 122 39% 49%;
+    --brand-gradient-to: 207 90% 54%;
+
+    /* Sidebar */
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 222.2 84% 4.9%;
+    --sidebar-primary: 122 39% 49%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 40% 96.1%;
+    --sidebar-accent-foreground: 222.2 84% 4.9%;
+    --sidebar-border: 214.3 31.8% 91.4%;
+    --sidebar-ring: 122 39% 49%;
+
+    --radius: 0.75rem;
   }
 
   .dark {
@@ -46,24 +68,45 @@
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 142 71% 40%;
+    --primary: 122 39% 45%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 100% 40%;
+    --secondary: 207 90% 45%;
     --secondary-foreground: 0 0% 100%;
 
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
 
-    --accent: 36 100% 45%;
+    --accent: 36 100% 50%;
     --accent-foreground: 0 0% 100%;
+
+    --success: 122 39% 45%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 45 100% 55%;
+    --warning-foreground: 0 0% 0%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
 
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 142 71% 40%;
+    --ring: 122 39% 45%;
+
+    --brand-light: 122 39% 15%;
+    --brand-dark: 122 39% 85%;
+    --brand-gradient-from: 122 39% 45%;
+    --brand-gradient-to: 207 90% 45%;
+
+    /* Sidebar dark */
+    --sidebar-background: 222.2 84% 4.9%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 122 39% 45%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 217.2 32.6% 17.5%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 217.2 32.6% 17.5%;
+    --sidebar-ring: 122 39% 45%;
   }
 }
 
@@ -74,35 +117,47 @@
 
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
 
 @layer components {
-  .kiwiiz-container {
-    @apply w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  .brand-gradient {
+    background: linear-gradient(135deg, hsl(var(--brand-gradient-from)), hsl(var(--brand-gradient-to)));
   }
   
-  .kiwiiz-btn-primary {
-    @apply bg-kiwiiz-primary text-white px-4 py-2 rounded-md hover:bg-kiwiiz-dark transition-colors duration-300;
-  }
-  
-  .kiwiiz-btn-secondary {
-    @apply bg-kiwiiz-secondary text-white px-4 py-2 rounded-md hover:opacity-90 transition-colors duration-300;
-  }
-  
-  .kiwiiz-btn-accent {
-    @apply bg-kiwiiz-accent text-black px-4 py-2 rounded-md hover:opacity-90 transition-colors duration-300;
+  .brand-text-gradient {
+    background: linear-gradient(135deg, hsl(var(--brand-gradient-from)), hsl(var(--brand-gradient-to)));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 
-  .kiwiiz-card {
-    @apply bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300;
-  }
-  
-  .kiwiiz-input {
-    @apply w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-kiwiiz-primary;
+  .card-hover {
+    @apply transition-all duration-300 hover:shadow-lg hover:scale-[1.02];
   }
 
-  .kiwiiz-badge {
-    @apply inline-block px-2 py-1 text-xs font-medium rounded-full;
+  .glass-effect {
+    @apply backdrop-blur-sm bg-white/80 dark:bg-black/40 border border-white/20;
+  }
+
+  .status-badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .status-pending {
+    @apply bg-warning/10 text-warning border border-warning/20;
+  }
+
+  .status-confirmed {
+    @apply bg-success/10 text-success border border-success/20;
+  }
+
+  .status-cancelled {
+    @apply bg-destructive/10 text-destructive border border-destructive/20;
+  }
+
+  .status-completed {
+    @apply bg-primary/10 text-primary border border-primary/20;
   }
 }
